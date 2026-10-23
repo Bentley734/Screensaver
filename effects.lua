@@ -102,6 +102,25 @@ return function(g,extra)
   effects[7]=function(t,w,h)
     if extra.pokemon then extra.pokemon(t,w,h,opacity) end
   end
+  for id,mode in pairs({[9]='orbit',[10]='constellation',[11]='mosaic'}) do
+    local style=mode
+    effects[id]=function(t,w,h)
+      if extra.pokemon then extra.pokemon(t,w,h,opacity,style) end
+    end
+  end
+  effects[12]=function(t,w,h)
+    for i=1,count(16,w,h) do
+      local phase=(t*.22+i*.618033989)%1
+      local x,y=(i*.754877666%1)*w,(i*.56984029%1)*h
+      local r=12+phase*100
+      local a=(1-phase)^1.4
+      color(.9,.2+.4*(i%3)/2,.4+.5*(i%2),a*.7)
+      g.setLineWidth(1.5);g.circle('line',x,y,r)
+      g.line(x-r,y,x-r*.24,y);g.line(x+r*.24,y,x+r,y)
+      g.circle('line',x,y,r*.24);g.circle('line',x,y,r*.1)
+      color(.2,.7,1,a*.25);g.circle('line',x,y,r+10)
+    end
+  end
   return function(effect,t,w,h,alpha,shade,palette)
     if w<=0 or h<=0 then return end
     g.push('all');g.origin();g.setShader();g.setScissor();g.setBlendMode('alpha')

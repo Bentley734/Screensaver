@@ -1,8 +1,8 @@
 return {
-  summary='Seven idle escapes with timed Random mode, Matrix colors and animated Pokemon from your sprite set.',
+  summary='Eleven idle escapes with four live Pokemon sprite layouts, Matrix colors and timed Random mode.',
   author='Bentley734',
   tags={'ui','screensaver','cosmetic'},
-  differences={changed={'Idle screen presentation'},added={'Seven effects','Timed Random mode','Ten Matrix palettes','Live Pokemon sprites','Idle timer and pause controls'},known={'Game audio continues while paused'}},
+  differences={changed={'Idle screen presentation'},added={'Eleven effects','Four live sprite layouts','Timed Random mode','Ten Matrix palettes','Idle timer and pause controls'},known={'Game audio continues while paused'}},
   credits={{who='Bentley734',for_='Mod design and original procedural effects'}},
   compat={engine='>=0.3.54 <0.4.0',modApi=2},
 }

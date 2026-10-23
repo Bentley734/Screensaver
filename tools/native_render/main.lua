@@ -31,24 +31,25 @@ function love.load()
     for i=1,16 do fixtureTime=i/60;rain.update(game,1/60) end
     local matrix=module('matrix')(g)
     local draw=module('effects')(g,{matrix=matrix,pokemon=rain.draw})
-    local names={'Star Warp','Aurora Veil','Neon Pokeballs','Prism Garden','Moonlit Ripples','Matrix Rain','Pokemon Rain (sprite provider fixture)'}
+    local names={'Star Warp','Aurora Veil','Neon Pokeballs','Prism Garden','Moonlit Ripples','Matrix Rain','Pokemon Rain','Pokemon Orbits','Pokemon Constellation','Pokemon Mosaic','Pokeball Pulses'}
+    local ids={1,2,3,4,5,6,7,9,10,11,12}
     local shots={}
-    for i=1,7 do
+    for i,id in ipairs(ids) do
       local c=g.newCanvas(960,540)
-      g.setCanvas(c);g.clear(0,0,0,1);draw(i,12,960,540,1);g.setCanvas()
+      g.setCanvas(c);g.clear(0,0,0,1);draw(id,12,960,540,1);g.setCanvas()
       local bytes=c:newImageData():encode('png'):getString()
-      local f=assert(io.open(root..'Screensaver/docs/effect-'..i..'.png','wb'));f:write(bytes);f:close()
+      local f=assert(io.open(root..'Screensaver/docs/effect-'..id..'.png','wb'));f:write(bytes);f:close()
       shots[i]=c
     end
     for _,size in ipairs({{320,240},{480,320},{1920,1080},{540,960},{2560,1080},{3840,1080},{5120,1440}}) do
       local c=g.newCanvas(size[1],size[2]);g.setCanvas(c)
-      for i=1,7 do draw(i,9,size[1],size[2],.5)end
+      for _,id in ipairs(ids) do draw(id,9,size[1],size[2],.5)end
       g.setCanvas();c:release()
     end
     local wideShots={}
-    for i=1,7 do
+    for i,id in ipairs(ids) do
       local c=g.newCanvas(1920,540);g.setCanvas(c);g.clear(0,0,0,1)
-      draw(i,12,1920,540,1);g.setCanvas();wideShots[i]=c
+      draw(id,12,1920,540,1);g.setCanvas();wideShots[i]=c
       local pixels=c:newImageData()
       for side=0,1 do
         local hits=0
@@ -61,7 +62,7 @@ function love.load()
         assert(hits>8,'effect '..i..' must populate outer third '..side..': '..hits)
       end
     end
-    local wideGallery=g.newCanvas(1920,3990);g.setCanvas(wideGallery);g.clear(.025,.035,.065,1)
+    local wideGallery=g.newCanvas(1920,6270);g.setCanvas(wideGallery);g.clear(.025,.035,.065,1)
     g.setFont(g.newFont(20))
     for i,c in ipairs(wideShots)do
       g.setColor(1,1,1,1);g.draw(c,0,(i-1)*570);g.print(names[i],20,(i-1)*570+544)
@@ -76,15 +77,15 @@ function love.load()
     g.setCanvas(transparent);g.clear(.8,.2,.1,1);draw(3,12,960,540,1,.5);g.setCanvas()
     r=transparent:newImageData():getPixel(0,0)
     assert(math.abs(r-.409)<.02,'half dim blends world')
-    local gallery=g.newCanvas(1200,1480);g.setCanvas(gallery);g.clear(.025,.035,.065,1)
+    local gallery=g.newCanvas(1200,2220);g.setCanvas(gallery);g.clear(.025,.035,.065,1)
     g.setFont(g.newFont(20))
     for i,c in ipairs(shots)do
       local x=((i-1)%2)*600;local y=math.floor((i-1)/2)*370
       g.setColor(1,1,1,1);g.draw(c,x,y,0,.625,.625);g.print(names[i],x+20,y+342)
     end
-    g.setColor(.8,.9,1,1);g.print('SCREENSAVER',640,1160)
-    g.print('Seven effects. Your world behind them.',640,1205)
-    g.print('Optional pause / adjustable background dim',640,1245)
+    g.setColor(.8,.9,1,1);g.print('SCREENSAVER',640,1900)
+    g.print('Eleven effects. Your world behind them.',640,1945)
+    g.print('Sprite previews use a local 1025Dex fixture.',640,1985)
     g.setCanvas()
     local bytes=gallery:newImageData():encode('png'):getString()
     local f=assert(io.open(root..'Screensaver/docs/gallery.png','wb'));f:write(bytes);f:close()
@@ -100,7 +101,7 @@ function love.load()
     bytes=palettes:newImageData():encode('png'):getString()
     f=assert(io.open(root..'Screensaver/docs/matrix-palettes.png','wb'));f:write(bytes);f:close()
   end,debug.traceback)
-  local f=io.open(root..'.work/screensaver-preview/result.txt','w');f:write(ok and 'PASS native graphics: seven effects, ten Matrix palettes, eight resolutions, 32:9 coverage and transparency' or tostring(err));f:close()
+  local f=io.open(root..'.work/screensaver-preview/result.txt','w');f:write(ok and 'PASS native graphics: eleven effects, ten Matrix palettes, eight resolutions, 32:9 coverage and transparency' or tostring(err));f:close()
   love.event.quit()
 end
 

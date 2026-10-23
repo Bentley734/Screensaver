@@ -1,7 +1,7 @@
 {
   "id": "screensaver",
   "name": "Screensaver",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "api": 2,
   "entry": "main.lua",
   "profile": "overhaul",
@@ -13,5 +13,5 @@
   "dependencies": [],
   "affects_link": false,
   "github": "Bentley734/Screensaver",
-  "description": "Seven idle effects plus Random mode with a configurable switch interval, colored Matrix rain and animated Pokemon rain from your active sprite set. Optional pause and live-world overlays."
+  "description": "Eleven idle effects, including four animated Pokemon sprite layouts, Pokeball Pulses, Matrix palettes and timed Random mode. Uses your active sprite set with optional pause and live-world overlays."
 }

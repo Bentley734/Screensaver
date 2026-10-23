@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0] - 2026-10-22
+
+### Added
+- Pokemon Orbits: animated sprites circle three elliptical tracks.
+- Pokemon Constellation: drifting sprites form a glowing linked star field.
+- Pokemon Mosaic: a scrolling grid of animated sprites with gentle bobbing.
+- Pokeball Pulses: expanding luminous Pokeball rings spread across the frame.
+
+### Changed
+- All four sprite layouts share the active-art provider, bounded species sample and animation support.
+- Random mode includes all eleven effects, while preserving its saved index and existing settings.
+
 ## [1.2.0] - 2026-10-22
 
 ### Added

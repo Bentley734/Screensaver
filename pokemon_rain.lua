@@ -106,27 +106,77 @@ return function(mod,g)
       end
     end
   end
-  function api.draw(t,w,h,alpha)
+  local function sprite(p,x,y,pixels,alpha)
+    local iw,ih=p.image:getDimensions()
+    local size=p.size or math.max(iw,ih)
+    local scale=pixels/size
+    g.setColor(1,1,1,alpha)
+    local pw,ph=p.size or iw,p.size or ih
+    if p.quad then g.draw(p.image,p.quad,x,y,0,scale,scale,pw/2,ph/2)
+    else g.draw(p.image,x,y,0,scale,scale,pw/2,ph/2) end
+  end
+  function api.draw(t,w,h,alpha,mode)
     local ready={}
     for i=1,loaded do if pool[i].image then ready[#ready+1]=pool[i] end end
     if #ready==0 then
       g.setColor(.7,.85,1,alpha);g.printf('LOADING CURRENT POKEMON SPRITES',0,h/2,w,'center');return
     end
     local count=math.max(24,math.min(96,math.floor(24*w*h/(960*540))))
+    if mode=='orbit' then
+      for ring=0,2 do
+        g.setColor(.2,.55,1,alpha*.2);g.setLineWidth(1)
+        g.ellipse('line',w/2,h/2,w*(.18+.14*ring),h*(.18+.14*ring))
+      end
+      for i=1,count do
+        local ring=(i-1)%3
+        local a=i*2.39996323+t*(.09+ring*.025)*(ring==1 and -1 or 1)
+        local x=w/2+math.cos(a)*w*(.18+.14*ring)
+        local y=h/2+math.sin(a)*h*(.18+.14*ring)
+        sprite(ready[1+(i-1)%#ready],x,y,48+ring*8,alpha*(.75+.1*ring))
+      end
+      return
+    elseif mode=='constellation' then
+      local points={}
+      for i=1,count do
+        points[i]={x=((i*.754877666+t*.008)%1)*(w+100)-50,
+          y=((i*.56984029+t*.003+math.sin(t*.18+i)*.012)%1)*(h+100)-50}
+      end
+      g.setLineWidth(1)
+      for i,p in ipairs(points) do
+        local links=0
+        for j=i+1,#points do
+          local q=points[j];local d=(p.x-q.x)^2+(p.y-q.y)^2
+          if d<240^2 then
+            g.setColor(.25,.65,1,alpha*.32*(1-d/240^2));g.line(p.x,p.y,q.x,q.y)
+            links=links+1;if links==2 then break end
+          end
+        end
+        g.setColor(.35,.8,1,alpha*.3);g.circle('line',p.x,p.y,24+3*math.sin(t+i))
+        sprite(ready[1+(i-1)%#ready],p.x,p.y,42+i%4*6,alpha*(.8+.2*math.sin(t*.4+i)^2))
+      end
+      return
+    elseif mode=='mosaic' then
+      local cell=100
+      local dx,dy=t*9%cell,t*5%cell
+      for row=-1,math.ceil(h/cell) do
+        for col=-1,math.ceil(w/cell) do
+          local x,y=col*cell+dx,row*cell+dy
+          local seed=col-math.floor(t*9/cell)+(row-math.floor(t*5/cell))*31
+          local p=ready[1+math.floor(((seed*.618033989)%1)*#ready)]
+          g.setColor(.1,.3,.5,alpha*.18);g.rectangle('line',x+4,y+4,cell-8,cell-8,8,8)
+          sprite(p,x+cell/2,y+cell/2+math.sin(t*.8+seed)*5,64,alpha*.9)
+        end
+      end
+      return
+    end
     for i=1,count do
       local speed=26+(i*.618033989%1)*45
       local distance=t*speed+(i*.56984029%1)*(h+160)
       local cycle=math.floor(distance/(h+160))
       local p=ready[1+math.floor(((i*.618033989+cycle*.414213562)%1)*#ready)]
-      local iw,ih=p.image:getDimensions()
-      local size=p.size or math.max(iw,ih)
-      local scale=(38+(i%4)*9)/size
       local x=(i*.754877666%1)*w+math.sin(t*.35+i)*12
       local y=distance%(h+160)-80
-      g.setColor(1,1,1,alpha*(.65+.35*(i%3)/2))
-      local pw,ph=p.size or iw,p.size or ih
-      if p.quad then g.draw(p.image,p.quad,x,y,0,scale,scale,pw/2,ph/2)
-      else g.draw(p.image,x,y,0,scale,scale,pw/2,ph/2) end
+      sprite(p,x,y,38+(i%4)*9,alpha*(.65+.35*(i%3)/2))
     end
   end
   return api

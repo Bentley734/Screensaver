@@ -26,12 +26,18 @@ print('PASS Matrix: batched glyphs, four animated gradients, fade alpha')
 local staticImage={getDimensions=function()return 64,64 end}
 local images,notices=0,0
 local rainGraphics={setColor=function()end,printf=function()notices=notices+1 end,
+  setLineWidth=function()end,ellipse=function()end,line=function()end,circle=function()end,rectangle=function()end,
   draw=function(img)assert(img==staticImage,'static sprite is not replaced');images=images+1 end}
 local rain=assert(load(files['mods/screensaver/pokemon_rain.lua']))()({generation=3},rainGraphics)
 local game={data={gen3Pokemon={_names={[1]='BULBASAUR'},frontPic=function()return {image=staticImage}end}}}
 rain.update(game,.1);rain.draw(1,960,540,1)
 rain.update(game,.1);rain.draw(2,1920,540,1)
 assert(images==24+48,'static sprites remain static at adaptive density')
+for _,mode in ipairs({'orbit','constellation','mosaic'}) do
+  local before=images
+  rain.draw(1,960,540,1,mode);rain.draw(2,1920,540,1,mode)
+  assert(images>before,'static art is rendered by '..mode)
+end
 rain.reset();rain.update({data={gen3Pokemon={_names={}}}},.1);rain.draw(0,960,540,1)
 assert(notices==1,'missing artwork degrades to a loading notice')
 print('PASS Pokemon rain: static art, adaptive density and missing-art fallback')

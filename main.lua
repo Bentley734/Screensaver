@@ -1,6 +1,9 @@
 return function(mod)
   local ID='screensaver'
-  local names={'STAR WARP','AURORA VEIL','NEON POKEBALLS','PRISM GARDEN','MOONLIT RIPPLES','MATRIX RAIN','POKEMON RAIN','RANDOM'}
+  local names={'STAR WARP','AURORA VEIL','NEON POKEBALLS','PRISM GARDEN','MOONLIT RIPPLES','MATRIX RAIN','POKEMON RAIN','RANDOM','POKEMON ORBITS','POKEMON CONSTELLATION','POKEMON MOSAIC','POKEBALL PULSES'}
+  -- Keep Random at its saved index 8; new renderers use the appended ids.
+  local effectIds={1,2,3,4,5,6,7,9,10,11,12}
+  local function usesSprites(id)return id==7 or id==9 or id==10 or id==11 end
   local matrixNames={'GREEN','AMBER','CYAN','RED','VIOLET','WHITE','RAINBOW FLOW','OCEAN FLOW','SUNSET FLOW','AURORA FLOW'}
   -- Keep the original saved indices stable when adding shorter delays.
   local delays={15,30,60,120,300,600,1,5,10}
@@ -9,7 +12,7 @@ return function(mod)
   local shades={0,.25,.5,.75,1}
   local intervals={5,10,15,30,60,120,300,600}
   local defaults={enabled=1,effect=1,delay=3,speed=2,pause=1,shade=3,matrix=1,interval=4}
-  local limits={enabled=1,effect=8,delay=9,speed=4,pause=1,shade=5,matrix=10,interval=8}
+  local limits={enabled=1,effect=12,delay=9,speed=4,pause=1,shade=5,matrix=10,interval=8}
   local function setting(k)
     local n=tonumber(mod.options:get(k)) or tonumber(mod.save:get(k)) or defaults[k]
     if n~=n or n==math.huge or n==-math.huge then n=defaults[k] end
@@ -26,8 +29,8 @@ return function(mod)
   local draw=module('effects')(love.graphics,{matrix=matrix,pokemon=rain.draw})
   local function shuffledEffect()
     if #bag==0 then
-      for i=1,7 do bag[i]=i end
-      for i=7,2,-1 do local j=math.random(i);bag[i],bag[j]=bag[j],bag[i] end
+      for i,id in ipairs(effectIds) do bag[i]=id end
+      for i=#bag,2,-1 do local j=math.random(i);bag[i],bag[j]=bag[j],bag[i] end
       if bag[#bag]==lastRandom then bag[1],bag[#bag]=bag[#bag],bag[1] end
     end
     lastRandom=table.remove(bag)
@@ -36,7 +39,7 @@ return function(mod)
   local function switchEffect(mode)
     local previous=currentEffect
     currentEffect=mode==8 and shuffledEffect() or mode
-    if previous==7 or currentEffect==7 then rain.reset() end
+    if usesSprites(previous) or usesSprites(currentEffect) then rain.reset() end
     modeLast,time,fade=mode,0,0
   end
   local function displayedEffect()
@@ -163,7 +166,7 @@ return function(mod)
         end
       end
       time=time+dt*speeds[setting('speed')];fade=math.min(1,fade+dt/.8)
-      if displayedEffect()==7 then rain.update(game,dt) end
+      if usesSprites(displayedEffect()) then rain.update(game,dt) end
       if setting('pause')==1 then return end
     end
     return nextFn(game,dt)
