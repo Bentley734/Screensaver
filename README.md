@@ -4,9 +4,9 @@ Screensaver gives your idle Gen1Recomp game seven animated escapes, with an opti
 
 ## Install
 
-1. Download `Screensaver-v1.1.0.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
+1. Download `Screensaver-v1.1.1.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
 2. Extract the `screensaver` folder into Gen1Recomp's `mods` directory, enable **Screensaver** in the mod manager and restart the game.
-3. Open **Options → Screensaver**, choose an effect and use **Preview** or leave the controls idle.
+3. Load a save, open **Options → Screensaver**, choose an effect and use **Preview** or leave the controls idle.
 
 Requires Gen1Recomp 0.3.54 or newer within the 0.3.x series. Targets Red, Blue, Yellow, Gold, Silver, Crystal, FireRed, LeafGreen, Ruby, Sapphire and Emerald. No Pokemon sprite files or ROM data are bundled in the playable package; Pokemon Rain borrows images from your own game and active sprite mods.
 
@@ -15,7 +15,7 @@ Requires Gen1Recomp 0.3.54 or newer within the 0.3.x series. Targets Red, Blue, 
 | Effect | Look |
 |---|---|
 | Star Warp | Blue-white star trails stream out from a glowing vanishing point. |
-| Aurora Veil | Layers of green, blue and violet light drift beneath a crescent moon. |
+| Aurora Veil | Animated waves of green, blue and violet light. |
 | Neon Pokeballs | 24 luminous balls bounce and rotate at 16:9; 48 fill a 32:9 screen, scaling with the layout. |
 | Prism Garden | A rotating sixfold garden of color-shifting diamonds. |
 | Moonlit Ripples | Expanding elliptical rings and wandering fireflies. |
@@ -35,13 +35,15 @@ Previews are in [docs](docs/), including a [32:9 gallery](docs/ultrawide.png), a
 | Pause game | On / Off | On |
 | Background dim | 0 / 25 / 50 / 75 / 100% | 50% |
 | Matrix color | Green / Amber / Cyan / Red / Violet / White / Rainbow Flow / Ocean Flow / Sunset Flow / Aurora Flow | Green |
-| Preview | Start immediately after releasing the selection button | — |
+| Preview | Start after releasing the selection button, within a loaded game | — |
 
 To keep watching the world move, set **Pause Game = Off**, then choose **Background Dim = 0%**, **25%** or **50%**. Effects remain visible over the live game. At 100%, the backdrop fully covers the game. With pause off, battles, scripts and world events continue normally beneath the screensaver. Audio continues in either mode.
 
 Press a key or controller button, move a stick, move/click the mouse, scroll, or touch the screen to dismiss. The initial keyboard/controller wake press and its matching release are consumed. Held gameplay controls prevent activation; modest stick drift is ignored. Losing window focus dismisses the screensaver and restarts the idle timer. Touch controls remain above the overlay.
 
 Settings persist through the game's normal options storage. Preview also enables the screensaver if it was off.
+
+The idle timer and Preview are enabled only after loading a save and entering gameplay. Intros, title/start screens and new-game setup never activate the screensaver. Returning to title dismisses the overlay and resets the timer; loading another save begins a fresh wait. A new adventure must be saved and loaded before Screensaver is eligible.
 
 For **Matrix Rain**, choose **Matrix Color** to select a solid palette or a flowing gradient. The [palette gallery](docs/matrix-palettes.png) shows all ten choices.
 

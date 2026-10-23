@@ -32,11 +32,6 @@ return function(g,extra)
     glow(w/2,h/2,8,.24,.45,1)
   end
   effects[2]=function(t,w,h)
-    for i=1,count(75,w,h) do
-      local x=(i*.754877666%1)*w
-      local y=(i*.56984029%1)*h
-      color(.7,.85,1,.15+.3*(sin(t*.6+i)*.5+.5));g.circle('fill',x,y,1)
-    end
     for band=1,3 do
       for layer=18,1,-1 do
         local points={}
@@ -49,8 +44,6 @@ return function(g,extra)
         g.setLineWidth(7);g.line(points)
       end
     end
-    color(.65,.82,1,.7);g.circle('fill',w*.82,h*.17,19)
-    color(.018,.025,.065);g.circle('fill',w*.82+8,h*.17-5,18)
   end
   local function bounce(t,range,offset)
     local v=(t+offset)%(range*2);return range-math.abs(range-v)

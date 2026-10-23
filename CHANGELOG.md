@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1] - 2026-10-22
+
+### Changed
+- Aurora Veil now shows only the animated light waves, without the moon or stars.
+- Screensaver and Preview only activate in gameplay after a save has loaded, never during intros, title/start screens or new-game setup.
+- Returning to title clears the idle timer; loading a save begins a fresh wait.
+
 ## [1.1.0] - 2026-10-22
 
 ### Added

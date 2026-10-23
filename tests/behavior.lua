@@ -2,10 +2,12 @@ package.path='./?.lua;./?/init.lua;'..package.path
 love=require('tests.love_stub')
 local draws=0
 local circleLines=0
+local circleCount,waveLines=0,0
 local glyphCount,imageFrames=0,{}
 for _,name in ipairs({'origin','setShader','setScissor','setBlendMode','scale','rotate','translate','setLineWidth','ellipse','polygon','line','circle','rectangle'}) do
   love.graphics[name]=function()draws=draws+1 end
 end
+love.graphics.line=function()draws=draws+1;waveLines=waveLines+1 end
 love.graphics.print=function(text)if #tostring(text)==1 then glyphCount=glyphCount+1 end end
 love.graphics.draw=function(img)
   draws=draws+1
@@ -13,6 +15,7 @@ love.graphics.draw=function(img)
 end
 love.graphics.circle=function(mode)
   draws=draws+1
+  circleCount=circleCount+1
   if mode=='line' then circleLines=circleLines+1 end
 end
 love.window={hasFocus=function()return true end}
@@ -36,6 +39,11 @@ local R=require('src.mods.Runtime')
 local options={enabled=1,delay=1,effect=1,speed=2,pause=1}
 loader.modOptions.screensaver=options
 local game={data=data,stack={push=function(self,s)self.topScreen=s end},options={modOptions={screensaver=options}},mods=loader,input={isDown=function()return false end},writeOptions=function()end}
+game.save={};game.session=game.save;game.overworld={}
+local function gameplay(on)
+  game.phase=on and (GV.generation()==3 and 'field' or 'play') or 'boot'
+  game.stack.states=on and {game.overworld} or {{screenId='TitleState'}}
+end
 local ticks=0
 local function update(n)
   for _=1,n do R.call('core.update',function()ticks=ticks+1 end,game,.25)end
@@ -50,10 +58,20 @@ local function event(h,ev)
   R.call(h,function()passed=true end,game,ev)
   return passed
 end
-update(59);assert(not render(),'does not start early')
+gameplay(false);update(3000);assert(not render(),'no screensaver during intro/title even with save skeleton')
+R.emit('save.created',{save=game.save});gameplay(true)
+update(3000);assert(not render(),'new game does not count as loaded save')
+gameplay(false);R.emit('save.loaded',{save=game.save})
+update(3000);assert(not render(),'loaded save preview on boot screen is not gameplay')
+gameplay(true)
+update(59);assert(not render(),'does not start early after entering loaded game')
 update(5);assert(render(),'starts after idle deadline')
 local paused=ticks;update(8);assert(ticks==paused,'pauses simulation')
 for i=1,5 do options.effect=i;assert(render(),'effect renders')end
+options.effect=2
+local circlesBeforeAurora,linesBeforeAurora=circleCount,waveLines
+assert(render())
+assert(circleCount==circlesBeforeAurora and waveLines>linesBeforeAurora,'Aurora is animated waves only: no moon or stars')
 options.effect=3
 local circlesBefore=circleLines
 assert(render());assert(circleLines-circlesBefore==24*3,'24 Pokeballs at 16:9')
@@ -152,6 +170,16 @@ update(4);local simulationBefore=ticks
 for _=1,4 do update(1);render() end
 assert(ticks==simulationBefore,'game remains paused during animated rain')
 assert(imageFrames.A and imageFrames.B,'sprite animation advances while paused')
+gameplay(false)
+assert(not render(),'title blocks stale overlay before another update')
+local beforeTitle=ticks;update(100)
+assert(ticks==beforeTitle+100 and not render(),'title remains unpaused with no activation')
+game.save={};game.session=game.save
+R.emit('save.created',{save=game.save});gameplay(true)
+update(100);assert(not render(),'new game after loaded session is blocked')
+R.emit('save.loaded',{save=game.save})
+update(3);assert(not render(),'loading another save starts a fresh one-second timer')
+update(1);assert(render(),'loaded game activates after full idle delay')
 R.hooks:removeOwner('sprite-fixture')
 assert(#loader.errors==0,table.concat(loader.errors,'\n'))
 R.hooks:removeOwner('screensaver');R.events:removeOwner('screensaver')

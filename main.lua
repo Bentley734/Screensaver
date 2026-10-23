@@ -22,11 +22,31 @@ return function(mod)
   local rain=module('pokemon_rain')(mod,love.graphics)
   local matrix=module('matrix')(love.graphics)
   local draw=module('effects')(love.graphics,{matrix=matrix,pokemon=rain.draw})
+  local loadedSave
   local function wake()
     local was=active
     idle,active,time,fade=0,false,0,0
     if was then waking=true;rain.reset() end
     return was
+  end
+  mod.events:on('save.loaded',function(payload)
+    loadedSave=payload and payload.save
+    wake();waking=false;previewRequested=false
+  end)
+  mod.events:on('save.created',function()
+    loadedSave=nil;wake();waking=false;previewRequested=false
+  end)
+  local function inLoadedGame(game)
+    if not game or not loadedSave then return false end
+    if mod.generation==3 then return game.session==loadedSave and game.phase=='field' end
+    if game.save~=loadedSave then return false end
+    if mod.generation==2 then return game.phase=='play' end
+    -- Gen 1 retains its save at the title. Require the actual overworld
+    -- beneath gameplay/menu states rather than trusting that save exists.
+    for _,state in ipairs(game.stack and game.stack.states or {}) do
+      if game.overworld and state==game.overworld then return true end
+    end
+    return false
   end
   local function held(game)
     if next(keys) or next(buttons) or next(axes) or next(pointers) then return true end
@@ -85,6 +105,10 @@ return function(mod)
   mod.hooks:wrap('core.update',function(nextFn,game,dt)
     -- Frame time, never game speed or fixed simulation ticks.
     dt=math.max(0,tonumber(dt) or 0)
+    if not inLoadedGame(game) then
+      wake();waking=false;previewRequested=false
+      return nextFn(game,dt)
+    end
     if setting('enabled')==0 then wake();waking=false;return nextFn(game,dt) end
     if love.window and love.window.hasFocus and not love.window.hasFocus() then
       wake();keys={};buttons={};axes={};pointers={};swallowedKeys={};swallowedButtons={}
@@ -112,7 +136,7 @@ return function(mod)
   end,-10000) -- Sprite providers must advance before we pause game:update.
   mod.hooks:wrap('render.hud',function(nextFn,game,viewport)
     local result=nextFn(game,viewport)
-    if active then draw(setting('effect'),time,viewport.width,viewport.height,fade,shades[setting('shade')],setting('matrix')) end
+    if active and inLoadedGame(game) then draw(setting('effect'),time,viewport.width,viewport.height,fade,shades[setting('shade')],setting('matrix')) end
     return result
   end,900)
   local function persist(ctx,k,value)
@@ -151,6 +175,7 @@ return function(mod)
     add('shade','BACKGROUND DIM',function()return tostring(shades[setting('shade')]*100)..'%'end)
     add('matrix','MATRIX COLOR',function()return matrixNames[setting('matrix')]end)
     local function preview(ctx)
+      if not inLoadedGame(ctx.game or ctx) then return false end
       if setting('enabled')==0 then persist(ctx,'enabled',1) end
       previewRequested=true;return false
     end
