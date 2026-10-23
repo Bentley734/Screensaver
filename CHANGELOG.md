@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2] - 2026-10-22
+
+### Added
+- 1-second, 5-second and 10-second idle delay options.
+
+### Changed
+- Delay choices cycle in ascending time order; existing saved delays and the 60-second default are preserved.
+
 ## [1.0.1] - 2026-10-22
 
 ### Changed

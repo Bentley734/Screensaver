@@ -1,11 +1,13 @@
 return function(mod)
   local ID='screensaver'
   local names={'STAR WARP','AURORA VEIL','NEON POKEBALLS','PRISM GARDEN','MOONLIT RIPPLES'}
-  local delays={15,30,60,120,300,600}
+  -- Keep the original saved indices stable when adding shorter delays.
+  local delays={15,30,60,120,300,600,1,5,10}
+  local delayOrder={7,8,9,1,2,3,4,5,6}
   local speeds={.5,1,1.5,2}
   local shades={0,.25,.5,.75,1}
   local defaults={enabled=1,effect=1,delay=3,speed=2,pause=1,shade=3}
-  local limits={enabled=1,effect=5,delay=6,speed=4,pause=1,shade=5}
+  local limits={enabled=1,effect=5,delay=9,speed=4,pause=1,shade=5}
   local function setting(k)
     local n=tonumber(mod.options:get(k)) or tonumber(mod.save:get(k)) or defaults[k]
     if n~=n or n==math.huge or n==-math.huge then n=defaults[k] end
@@ -125,6 +127,13 @@ return function(mod)
   local function rows(out)
     local function add(k,label,value)
       out[#out+1]={id=ID..':'..k,label=label,value=value,step=function(ctx,dir)
+        if k=='delay' then
+          for i,index in ipairs(delayOrder) do
+            if index==setting(k) then
+              return persist(ctx,k,delayOrder[1+(i-1+(dir and dir<0 and -1 or 1))%#delayOrder])
+            end
+          end
+        end
         local low=(k=='enabled' or k=='pause') and 0 or 1
         return persist(ctx,k,low+(setting(k)-low+(dir and dir<0 and -1 or 1))%(limits[k]-low+1))
       end}

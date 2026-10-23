@@ -4,7 +4,7 @@ Screensaver gives your idle Gen1Recomp game five animated escapes, with an optio
 
 ## Install
 
-1. Download `Screensaver-v1.0.1.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
+1. Download `Screensaver-v1.0.2.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
 2. Extract the `screensaver` folder into Gen1Recomp's `mods` directory, enable **Screensaver** in the mod manager and restart the game.
 3. Open **Options → Screensaver**, choose an effect and use **Preview** or leave the controls idle.
 
@@ -28,7 +28,7 @@ Previews are in [docs](docs/), including a [32:9 gallery](docs/ultrawide.png), a
 |---|---|---|
 | Screensaver | On / Off | On |
 | Effect | Five effects above | Star Warp |
-| Idle delay | 15 / 30 / 60 / 120 / 300 / 600 seconds | 60 seconds |
+| Idle delay | 1 / 5 / 10 / 15 / 30 / 60 / 120 / 300 / 600 seconds | 60 seconds |
 | Animation speed | 0.5× / 1× / 1.5× / 2× | 1× |
 | Pause game | On / Off | On |
 | Background dim | 0 / 25 / 50 / 75 / 100% | 50% |
@@ -55,4 +55,5 @@ python gen1recomp-0.3.54/tools/modkit.py lint Screensaver
 ```
 
 All effects are original procedural drawings, using ordinary LÖVE primitives with no shader or texture dependencies.
+
 

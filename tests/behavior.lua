@@ -65,6 +65,15 @@ if GV.generation()~=3 then
   rows[1].activate(game)
   assert(#game.stack.topScreen.items==8,'seven controls and back')
   local controls=game.stack.topScreen.items
+  for _,expected in ipairs({{9,'10 SEC'},{8,'5 SEC'},{7,'1 SEC'},{6,'600 SEC'}}) do
+    controls[3].control.step(game,-1)
+    assert(loader.modOptions.screensaver.delay==expected[1],'delay saved index')
+    assert(controls[3].control.value()==expected[2],'delay label and chronological wrap')
+  end
+  controls[3].control.step(game,1)
+  assert(loader.modOptions.screensaver.delay==7,'600 wraps forward to 1 second')
+  for _=1,3 do controls[3].control.step(game,1) end
+  assert(loader.modOptions.screensaver.delay==1,'returns to original 15-second setting')
   controls[5].control.step(game,1)
   assert(loader.modOptions.screensaver.pause==0,'pause choice persisted')
   controls[6].control.step(game,-1)
@@ -85,6 +94,14 @@ love.window.hasFocus=function()return false end
 update(1);assert(not render(),'focus loss dismisses')
 love.window.hasFocus=function()return true end
 update(2);assert(not render(),'focus recovery restarts timer')
+update(65);assert(render())
+for slot,seconds in ipairs({15,30,60,120,300,600,1,5,10}) do
+  loader.modOptions.screensaver.delay=slot
+  event('input.key',{phase='pressed',key='x'})
+  event('input.key',{phase='released',key='x'});update(1)
+  update(seconds*4-1);assert(not render(),'no early activation for '..seconds..' seconds')
+  update(1);assert(render(),'activation at '..seconds..' seconds')
+end
 assert(#loader.errors==0,table.concat(loader.errors,'\n'))
 R.hooks:removeOwner('screensaver');R.events:removeOwner('screensaver')
 local after=ticks;update(1);assert(ticks==after+1,'unload restores normal update')
