@@ -1,0 +1,8 @@
+return {
+  summary='Five animated idle escapes with instant wake-up and optional gameplay pause.',
+  author='Bentley734',
+  tags={'ui','screensaver','cosmetic'},
+  differences={changed={'Idle screen presentation'},added={'Five effects','Idle timer and pause controls'},known={'Game audio continues while paused'}},
+  credits={{who='Bentley734',for_='Mod design and original procedural effects'}},
+  compat={engine='>=0.3.54 <0.4.0',modApi=2},
+}

@@ -1,0 +1,17 @@
+{
+  "id": "screensaver",
+  "name": "Screensaver",
+  "version": "1.0.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "overhaul",
+  "games": ["all"],
+  "game_version": ">=0.3.54 <0.4.0",
+  "category": "UI",
+  "priority": 900,
+  "permissions": ["engine_internals"],
+  "dependencies": [],
+  "affects_link": false,
+  "github": "Bentley734/Screensaver",
+  "description": "Five animated idle screensavers with configurable delay, speed, gentle fade-in and automatic wake-up. Pauses gameplay by default."
+}
