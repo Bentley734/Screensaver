@@ -13,10 +13,22 @@ return function(mod)
   local intervals={5,10,15,30,60,120,300,600}
   local defaults={enabled=1,effect=1,delay=3,speed=2,pause=1,shade=3,matrix=1,interval=4}
   local limits={enabled=1,effect=17,delay=9,speed=4,pause=1,shade=5,matrix=10,interval=8}
+  for _,id in ipairs(effectIds) do defaults['random_'..id]=1;limits['random_'..id]=1 end
   local function setting(k)
     local n=tonumber(mod.options:get(k)) or tonumber(mod.save:get(k)) or defaults[k]
     if n~=n or n==math.huge or n==-math.huge then n=defaults[k] end
-    return math.max((k=='enabled' or k=='pause') and 0 or 1,math.min(limits[k],math.floor(n)))
+    return math.max((k=='enabled' or k=='pause' or k:match('^random_%d+$')) and 0 or 1,math.min(limits[k],math.floor(n)))
+  end
+  local function selectedEffects()
+    local ids={}
+    for _,id in ipairs(effectIds) do if setting('random_'..id)==1 then ids[#ids+1]=id end end
+    -- Recover a manually edited empty selection without producing a nil renderer.
+    if #ids==0 then ids[1]=1 end
+    return ids
+  end
+  local function included(id)
+    for _,selected in ipairs(selectedEffects()) do if selected==id then return true end end
+    return false
   end
   local idle,active,time,fade=0,false,0,0
   local bag,lastRandom,currentEffect,modeLast,cycleTime={},nil,nil,nil,0
@@ -29,7 +41,7 @@ return function(mod)
   local draw=module('effects')(love.graphics,{matrix=matrix,pokemon=rain.draw,classic=module('classic')(love.graphics)})
   local function shuffledEffect()
     if #bag==0 then
-      for i,id in ipairs(effectIds) do bag[i]=id end
+      for i,id in ipairs(selectedEffects()) do bag[i]=id end
       for i=#bag,2,-1 do local j=math.random(i);bag[i],bag[j]=bag[j],bag[i] end
       if bag[#bag]==lastRandom then bag[1],bag[#bag]=bag[#bag],bag[1] end
     end
@@ -39,6 +51,8 @@ return function(mod)
   local function switchEffect(mode)
     local previous=currentEffect
     currentEffect=mode==8 and shuffledEffect() or mode
+    -- With one selected effect, keep its animation and sprite sample continuous.
+    if previous==currentEffect and modeLast==mode then return end
     if usesSprites(previous) or usesSprites(currentEffect) then rain.reset() end
     modeLast,time,fade=mode,0,0
   end
@@ -192,6 +206,22 @@ return function(mod)
     if game.writeOptions then game:writeOptions() end
     return false
   end
+  local settings
+  local function randomRows(out)
+    for _,effectId in ipairs(effectIds) do
+      local id=effectId
+      out[#out+1]={id=ID..':random_'..id,label=names[id],
+        value=function()
+          if not included(id) then return 'OFF' end
+          return #selectedEffects()==1 and 'LAST ON' or 'ON'
+        end,
+        step=function(ctx)
+          if included(id) and #selectedEffects()==1 then return false end
+          return persist(ctx,'random_'..id,included(id) and 0 or 1)
+        end}
+    end
+    return out
+  end
   local function rows(out)
     local function add(k,label,value)
       out[#out+1]={id=ID..':'..k,label=label,value=value,step=function(ctx,dir)
@@ -221,9 +251,13 @@ return function(mod)
     end
     out[#out+1]={id=ID..':preview',label='PREVIEW',value=function()return 'START'end,
       step=preview,activate=preview}
+    local function openRandom(ctx)return settings.random(ctx.game or ctx)end
+    out[#out+1]={id=ID..':random_effects',label='RANDOM EFFECTS',
+      value=function()return tostring(#selectedEffects())..' / '..#effectIds end,
+      step=openRandom,activate=openRandom}
     return out
   end
-  local settings=assert(load(assert(mod:read('settings.lua')),'@screensaver/settings.lua'))()(mod,rows)
+  settings=assert(load(assert(mod:read('settings.lua')),'@screensaver/settings.lua'))()(mod,rows,randomRows)
   local marker=function(nextFn,game,out)return settings.root(nextFn(game,out),game)end
   mod.hooks:wrap('ui.options.rows',marker,900)
   -- Gen 3 builds option rows outside the shared hook. Check hook ownership so

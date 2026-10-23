@@ -1,7 +1,7 @@
 {
   "id": "screensaver",
   "name": "Screensaver",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "api": 2,
   "entry": "main.lua",
   "profile": "overhaul",
@@ -13,5 +13,5 @@
   "dependencies": [],
   "affects_link": false,
   "github": "Bentley734/Screensaver",
-  "description": "Sixteen idle effects with classic desktop homages, four live Pokemon sprite layouts, Matrix palettes and timed Random mode. Optional pause and live-world overlays."
+  "description": "Sixteen idle effects with a selectable Random playlist, classic desktop homages, live Pokemon sprite layouts and Matrix palettes. Optional pause and live-world overlays."
 }

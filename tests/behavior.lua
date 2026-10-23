@@ -4,7 +4,7 @@ local draws=0
 local circleLines=0
 local circleCount,waveLines=0,0
 local glyphCount,imageFrames=0,{}
-local observedEffect
+local observedEffect,observedTime
 for _,name in ipairs({'origin','setShader','setScissor','setBlendMode','scale','rotate','translate','setLineWidth','ellipse','polygon','line','circle','rectangle'}) do
   love.graphics[name]=function()draws=draws+1 end
 end
@@ -13,6 +13,8 @@ love.graphics.print=function(text)
   if #tostring(text)==1 then glyphCount=glyphCount+1 end
   local effect=tostring(text):match('^__screensaver_effect:(%d+)$')
   if effect then observedEffect=tonumber(effect) end
+  local time=tostring(text):match('^__screensaver_time:(.+)$')
+  if time then observedTime=tonumber(time) end
 end
 love.graphics.draw=function(img)
   draws=draws+1
@@ -39,7 +41,7 @@ local Loader=require('src.mods.Loader')
 -- Observe dispatch while still executing each production renderer.
 local effectSource=files['mods/screensaver/effects.lua']
 files['mods/screensaver/effects.lua']='local factory=(function()\n'..effectSource..'\nend)()\n'
-  .."return function(g,extra)local draw=factory(g,extra);return function(effect,...)g.print('__screensaver_effect:'..effect,0,0);return draw(effect,...)end end"
+  .."return function(g,extra)local draw=factory(g,extra);return function(effect,time,...)g.print('__screensaver_effect:'..effect,0,0);g.print('__screensaver_time:'..time,0,0);return draw(effect,time,...)end end"
 local loader=Loader.new({fs=fs,generation=GV.generation(),version=arg[1],dev=false})
 local data={pokemon={},moves={},items={},maps={},tilesets={}}
 loader:load(data)
@@ -107,7 +109,7 @@ assert(#rows==1 and rows[1].id=='screensaver:settings','settings entry')
 -- Exercise settings with the actual registered list screen for Gen 1/2.
 if GV.generation()~=3 then
   rows[1].activate(game)
-  assert(#game.stack.topScreen.items==10,'nine controls and back')
+  assert(#game.stack.topScreen.items==11,'ten controls and back')
   local controls=game.stack.topScreen.items
   for _,expected in ipairs({{9,'10 SEC'},{8,'5 SEC'},{7,'1 SEC'},{6,'600 SEC'}}) do
     controls[3].control.step(game,-1)
@@ -222,6 +224,80 @@ for slot,seconds in ipairs({5,10,15,30,60,120,300,600}) do
   update(seconds*4-1);render();assert(observedEffect==initial,'full Random interval '..seconds)
   update(1);render();assert(observedEffect~=initial,'Random switches at '..seconds)
 end
+-- Open the real nested settings page on every generation.
+local poolControls={}
+local mainControls
+if GV.generation()==3 then
+  local family=({ruby=true,sapphire=true,emerald=true})[arg[1]]
+  local menu=require(family and 'src.ui.game3.rse.option_menu' or 'src.ui.game3.option_menu')
+  if family then menu._st.pages={} else menu._pages={} end
+  rows[1].activate(game)
+  local pages=menu._pages or menu._st.pages
+  mainControls=pages[#pages].rows
+  assert(mainControls[10].value()=='16 / 16','all effects selected by default')
+  mainControls[10].activate({game=game,options=game.options})
+  poolControls=pages[#pages].rows
+else
+  rows[1].activate(game)
+  mainControls={}
+  for _,item in ipairs(game.stack.topScreen.items)do if item.control then mainControls[#mainControls+1]=item.control end end
+  assert(mainControls[10].value()=='16 / 16','all effects selected by default')
+  mainControls[10].step(game,1)
+  assert(#game.stack.topScreen.items==17,'sixteen switches plus Back')
+  for _,item in ipairs(game.stack.topScreen.items)do if item.control then poolControls[#poolControls+1]=item.control end end
+end
+assert(#poolControls==16,'Random Effects submenu has all sixteen choices')
+local allowed={[2]=true,[6]=true,[17]=true}
+for _,control in ipairs(poolControls)do
+  local id=tonumber(control.id:match('random_(%d+)$'))
+  assert(control.value()=='ON','new install includes effect '..id)
+  if not allowed[id] then control.step(game,1) end
+end
+assert(mainControls[10].value()=='3 / 16','selected count updates')
+options=loader.modOptions.screensaver
+options.effect=8;options.interval=1;options.pause=1
+event('input.key',{phase='pressed',key='x'});event('input.key',{phase='released',key='x'});update(1)
+-- A settings edit may already have dismissed the saver. Load clears all timing.
+R.emit('save.loaded',{save=game.save});update(4)
+local subsetSeen={}
+for i=1,12 do
+  render();assert(allowed[observedEffect],'disabled effects are excluded')
+  if i%3==1 then subsetSeen={} end
+  assert(not subsetSeen[observedEffect],'selected subset shuffles without repeats')
+  subsetSeen[observedEffect]=true;update(20)
+end
+for _,control in ipairs(poolControls)do
+  local id=tonumber(control.id:match('random_(%d+)$'))
+  if id==6 or id==17 then control.step(game,1) end
+end
+assert(mainControls[10].value()=='1 / 16','single effect is allowed')
+local last
+for _,control in ipairs(poolControls)do if control.id=='screensaver:random_2' then last=control end end
+assert(last.value()=='LAST ON','last choice explains why it cannot be disabled')
+last.step(game,1)
+assert(loader.modOptions.screensaver.random_2==1,'last enabled choice remains saved')
+options=loader.modOptions.screensaver
+options.speed=2
+R.emit('save.loaded',{save=game.save});update(4);render();local singleTime=observedTime
+update(80);render()
+assert(observedEffect==2 and observedTime>singleTime+19,'one-effect Random stays continuous across intervals')
+-- Exclusion never removes an effect from manual selection.
+options.effect=3;update(1);render();assert(observedEffect==3,'excluded effect can still be chosen manually')
+-- Recover safely if a user hand-edits all flags to zero.
+for _,control in ipairs(poolControls)do
+  local id=control.id:match('random_(%d+)$');options['random_'..id]=0
+end
+options.effect=8;R.emit('save.loaded',{save=game.save});update(4);render()
+assert(observedEffect==1,'empty stored list safely falls back to Star Warp')
+-- Put every choice back through its actual persisted control.
+for _,control in ipairs(poolControls)do if control.value()=='OFF' then control.step(game,1) end end
+if loader.modOptions.screensaver.random_1==0 then
+  -- Selecting other effects removes the temporary fallback; now enable it too.
+  poolControls[1].step(game,1)
+end
+assert(mainControls[10].value()=='16 / 16','all choices can be restored')
+options=loader.modOptions.screensaver
+R.emit('save.loaded',{save=game.save});update(4)
 options.pause=0;local liveTicks=ticks
 update(4);render();assert(ticks==liveTicks+4,'Random permits live world when pause is off')
 assert(not event('input.key',{phase='pressed',key='x'}),'Random wake key consumed')

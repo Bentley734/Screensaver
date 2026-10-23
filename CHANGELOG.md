@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.5.0] - 2026-10-22
+
+### Added
+- Random Effects submenu with persistent On/Off switches for all sixteen screensavers and a selected-effect count.
+- Random shuffles only the chosen effects; existing installations default to all effects included.
+
+### Changed
+- The last enabled effect cannot be disabled. One-effect playlists keep their animation continuous across switch intervals.
+- Hand-edited empty playlists safely fall back to Star Warp; manual effect selection is independent of the playlist.
+
 ## [1.4.0] - 2026-10-22
 
 ### Added
