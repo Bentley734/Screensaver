@@ -1,13 +1,14 @@
 return function(mod)
   local ID='screensaver'
-  local names={'STAR WARP','AURORA VEIL','NEON POKEBALLS','PRISM GARDEN','MOONLIT RIPPLES'}
+  local names={'STAR WARP','AURORA VEIL','NEON POKEBALLS','PRISM GARDEN','MOONLIT RIPPLES','MATRIX RAIN','POKEMON RAIN'}
+  local matrixNames={'GREEN','AMBER','CYAN','RED','VIOLET','WHITE','RAINBOW FLOW','OCEAN FLOW','SUNSET FLOW','AURORA FLOW'}
   -- Keep the original saved indices stable when adding shorter delays.
   local delays={15,30,60,120,300,600,1,5,10}
   local delayOrder={7,8,9,1,2,3,4,5,6}
   local speeds={.5,1,1.5,2}
   local shades={0,.25,.5,.75,1}
-  local defaults={enabled=1,effect=1,delay=3,speed=2,pause=1,shade=3}
-  local limits={enabled=1,effect=5,delay=9,speed=4,pause=1,shade=5}
+  local defaults={enabled=1,effect=1,delay=3,speed=2,pause=1,shade=3,matrix=1}
+  local limits={enabled=1,effect=7,delay=9,speed=4,pause=1,shade=5,matrix=10}
   local function setting(k)
     local n=tonumber(mod.options:get(k)) or tonumber(mod.save:get(k)) or defaults[k]
     if n~=n or n==math.huge or n==-math.huge then n=defaults[k] end
@@ -17,11 +18,14 @@ return function(mod)
   local keys,buttons,axes,swallowedKeys,swallowedButtons={},{},{},{},{}
   local waking,previewRequested=false,false
   local pointers={}
-  local draw=assert(load(assert(mod:read('effects.lua')),'@screensaver/effects.lua'))()(love.graphics)
+  local function module(name)return assert(load(assert(mod:read(name..'.lua')),'@screensaver/'..name..'.lua'))()end
+  local rain=module('pokemon_rain')(mod,love.graphics)
+  local matrix=module('matrix')(love.graphics)
+  local draw=module('effects')(love.graphics,{matrix=matrix,pokemon=rain.draw})
   local function wake()
     local was=active
     idle,active,time,fade=0,false,0,0
-    if was then waking=true end
+    if was then waking=true;rain.reset() end
     return was
   end
   local function held(game)
@@ -101,13 +105,14 @@ return function(mod)
     if idle>=delays[setting('delay')] then active=true end
     if active then
       time=time+dt*speeds[setting('speed')];fade=math.min(1,fade+dt/.8)
+      if setting('effect')==7 then rain.update(game,dt) end
       if setting('pause')==1 then return end
     end
     return nextFn(game,dt)
-  end,900)
+  end,-10000) -- Sprite providers must advance before we pause game:update.
   mod.hooks:wrap('render.hud',function(nextFn,game,viewport)
     local result=nextFn(game,viewport)
-    if active then draw(setting('effect'),time,viewport.width,viewport.height,fade,shades[setting('shade')]) end
+    if active then draw(setting('effect'),time,viewport.width,viewport.height,fade,shades[setting('shade')],setting('matrix')) end
     return result
   end,900)
   local function persist(ctx,k,value)
@@ -144,6 +149,7 @@ return function(mod)
     add('speed','ANIMATION SPEED',function()return tostring(speeds[setting('speed')])..'X'end)
     add('pause','PAUSE GAME',function()return setting('pause')==1 and 'ON' or 'OFF'end)
     add('shade','BACKGROUND DIM',function()return tostring(shades[setting('shade')]*100)..'%'end)
+    add('matrix','MATRIX COLOR',function()return matrixNames[setting('matrix')]end)
     local function preview(ctx)
       if setting('enabled')==0 then persist(ctx,'enabled',1) end
       previewRequested=true;return false

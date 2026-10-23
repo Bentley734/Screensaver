@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.0] - 2026-10-22
+
+### Added
+- Matrix Rain with green, amber, cyan, red, violet and white palettes.
+- Animated Rainbow Flow, Ocean Flow, Sunset Flow and Aurora Flow gradients.
+- Pokemon Rain draws random front sprites from the current game's live sprite providers, including animated mod frames and Crystal frame sheets.
+- Batched Matrix text drawing, bounded sprite sampling and gradual sprite warm-up.
+
+### Changed
+- Sprite-provider updates continue before Screensaver pauses the simulation, preserving animations and asynchronous sprite builds while paused.
+
 ## [1.0.3] - 2026-10-22
 
 ### Changed

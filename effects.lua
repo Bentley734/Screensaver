@@ -1,5 +1,6 @@
 -- Original procedural artwork. No textures, shaders, ROM assets or per-frame canvases.
-return function(g)
+return function(g,extra)
+  extra=extra or {}
   local pi, sin, cos = math.pi, math.sin, math.cos
   local opacity=1
   local function color(r,b,c,a) g.setColor(r,b,c,(a or 1)*opacity) end
@@ -102,7 +103,13 @@ return function(g)
       glow(x,y,2,.45,.9,.75)
     end
   end
-  return function(effect,t,w,h,alpha,shade)
+  effects[6]=function(t,w,h,palette)
+    if extra.matrix then extra.matrix(t,w,h,opacity,palette) end
+  end
+  effects[7]=function(t,w,h)
+    if extra.pokemon then extra.pokemon(t,w,h,opacity) end
+  end
+  return function(effect,t,w,h,alpha,shade,palette)
     if w<=0 or h<=0 then return end
     g.push('all');g.origin();g.setShader();g.setScissor();g.setBlendMode('alpha')
     -- Fit the short axis so portrait layouts get full-height compositions too.
@@ -111,7 +118,7 @@ return function(g)
     g.scale(scale,scale);w=w/scale;h=h/scale
     opacity=alpha
     color(.018,.025,.065,shade or 1);g.rectangle('fill',0,0,w,h)
-    effects[effect](t,w,h)
+    effects[effect](t,w,h,palette)
     g.pop()
   end
 end

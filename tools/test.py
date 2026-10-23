@@ -22,4 +22,5 @@ for runtime in ('luajit21','lua53'):
         lua.globals().arg=lua.table_from([version])
         lua.globals().files=lua.table_from({'mods/screensaver/'+p.name:p.read_text(encoding='utf-8-sig') for p in (root/'Screensaver').iterdir() if p.is_file()})
         lua.execute((root/'Screensaver/tests/behavior.lua').read_text())
+        lua.execute((root/'Screensaver/tests/rain_modules.lua').read_text())
     print('PASS runtime '+runtime)

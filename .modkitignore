@@ -1,10 +1,14 @@
 tests/behavior.lua
+tests/rain_modules.lua
 tools/test.py
 docs/effect-1.png
 docs/effect-2.png
 docs/effect-3.png
 docs/effect-4.png
 docs/effect-5.png
+docs/effect-6.png
+docs/effect-7.png
+docs/matrix-palettes.png
 docs/gallery.png
 docs/ultrawide.png
 .gitignore

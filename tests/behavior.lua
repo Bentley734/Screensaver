@@ -2,8 +2,14 @@ package.path='./?.lua;./?/init.lua;'..package.path
 love=require('tests.love_stub')
 local draws=0
 local circleLines=0
+local glyphCount,imageFrames=0,{}
 for _,name in ipairs({'origin','setShader','setScissor','setBlendMode','scale','rotate','translate','setLineWidth','ellipse','polygon','line','circle','rectangle'}) do
   love.graphics[name]=function()draws=draws+1 end
+end
+love.graphics.print=function(text)if #tostring(text)==1 then glyphCount=glyphCount+1 end end
+love.graphics.draw=function(img)
+  draws=draws+1
+  if type(img)=='table' and img.fixtureFrame then imageFrames[img.fixtureFrame]=true end
 end
 love.graphics.circle=function(mode)
   draws=draws+1
@@ -74,7 +80,7 @@ assert(#rows==1 and rows[1].id=='screensaver:settings','settings entry')
 -- Exercise settings with the actual registered list screen for Gen 1/2.
 if GV.generation()~=3 then
   rows[1].activate(game)
-  assert(#game.stack.topScreen.items==8,'seven controls and back')
+  assert(#game.stack.topScreen.items==9,'eight controls and back')
   local controls=game.stack.topScreen.items
   for _,expected in ipairs({{9,'10 SEC'},{8,'5 SEC'},{7,'1 SEC'},{6,'600 SEC'}}) do
     controls[3].control.step(game,-1)
@@ -90,6 +96,8 @@ if GV.generation()~=3 then
   controls[6].control.step(game,-1)
   assert(loader.modOptions.screensaver.shade==2,'background dim choice persisted')
   controls[7].control.step(game,1)
+  assert(loader.modOptions.screensaver.matrix==2,'Matrix color saved')
+  controls[8].control.step(game,1)
   update(1);assert(render(),'preview activates without idle delay')
   event('input.key',{phase='pressed',key='x'})
   event('input.key',{phase='released',key='x'});update(2)
@@ -113,7 +121,39 @@ for slot,seconds in ipairs({15,30,60,120,300,600,1,5,10}) do
   update(seconds*4-1);assert(not render(),'no early activation for '..seconds..' seconds')
   update(1);assert(render(),'activation at '..seconds..' seconds')
 end
+options=loader.modOptions.screensaver
+options.effect=6
+for palette=1,10 do
+  options.matrix=palette
+  local before=glyphCount
+  assert(render());assert(glyphCount>before,'Matrix glyphs for palette '..palette)
+end
+-- Animated sprite fixture: provider changes frames while the game is paused.
+local frameTick=0
+local frameA={fixtureFrame='A',getDimensions=function()return 64,64 end}
+local frameB={fixtureFrame='B',getDimensions=function()return 64,64 end}
+local function fixtureFrame()return frameTick%2==0 and frameA or frameB end
+R.hooks:wrap('core.update',function(nextFn,g,dt)frameTick=frameTick+1;return nextFn(g,dt)end,0,'sprite-fixture')
+if GV.generation()==3 then
+  data.gen3Pokemon={_names={[1]='BULBASAUR',[2]='IVYSAUR'},frontPic=function()return {image=fixtureFrame()}end}
+else
+  data.pokemon={BULBASAUR={spriteFront='fixture/bulbasaur'},IVYSAUR={spriteFront='fixture/ivysaur'}}
+  local Assets=require('src.render.Assets')
+  Assets.image=function(path)assert(path:find('selected/'),'current sprite path hook used');return frameA end
+  R.hooks:wrap('pokemon.sprite',function(_,path)return 'selected/'..path end,0,'sprite-fixture')
+  R.hooks:wrap('battle.mon_pic',function(_,img,ctx)
+    assert(ctx.mon.species and ctx.side=='front');return fixtureFrame()
+  end,0,'sprite-fixture')
+end
+event('input.key',{phase='pressed',key='x'})
+event('input.key',{phase='released',key='x'});update(1)
+options.effect=7;options.delay=7;options.pause=1
+update(4);local simulationBefore=ticks
+for _=1,4 do update(1);render() end
+assert(ticks==simulationBefore,'game remains paused during animated rain')
+assert(imageFrames.A and imageFrames.B,'sprite animation advances while paused')
+R.hooks:removeOwner('sprite-fixture')
 assert(#loader.errors==0,table.concat(loader.errors,'\n'))
 R.hooks:removeOwner('screensaver');R.events:removeOwner('screensaver')
 local after=ticks;update(1);assert(ticks==after+1,'unload restores normal update')
-print('PASS '..arg[1]..': loader, five effects, deadline, pause, held input, wake, focus, disable, unload')
+print('PASS '..arg[1]..': seven effects, ten Matrix palettes, live animated sprite providers, nine delays, pause and wake')

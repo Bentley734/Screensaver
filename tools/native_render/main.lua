@@ -2,10 +2,38 @@ local root=assert(os.getenv('SCREENSAVER_WORKSPACE'),'Set SCREENSAVER_WORKSPACE 
 function love.load()
   local ok,err=xpcall(function()
     local g=love.graphics
-    local source=assert(io.open(root..'Screensaver/effects.lua','rb'));local code=source:read('*a');source:close();local draw=assert(loadstring(code))()(g)
-    local names={'Star Warp','Aurora Veil','Neon Pokeballs','Prism Garden','Moonlit Ripples'}
+    local function module(name)
+      local source=assert(io.open(root..'Screensaver/'..name..'.lua','rb'));local code=source:read('*a');source:close();return assert(loadstring(code))()
+    end
+    package.path=root..'gen1recomp-0.3.54/?.lua;'..package.path
+    local rain=module('pokemon_rain')({generation=3},g)
+    local fixtureTime=0
+    local images={}
+    local namesList={}
+    for i,stem in ipairs({'BULBASAUR','BLASTOISE_2','EMOLGA','CACTURNE','TYRANITAR_1','SANDSHREW_1','BASCULEGION_1'}) do
+      local function picture(frame)
+        local f=io.open(root..'.work/sprite-render-probe/'..stem..'-front-style0-frame'..frame..'.png','rb')
+        if not f then return nil end
+        local bytes=f:read('*a');f:close()
+        local image=g.newImage(love.filesystem.newFileData(bytes,stem..'.png'));image:setFilter('nearest','nearest');return image
+      end
+      local img=picture(1)
+      if not img then
+        local pixels=love.image.newImageData(32,32)
+        for y=8,23 do for x=8,23 do pixels:setPixel(x,y,.3,.8,1,1) end end
+        img=g.newImage(pixels)
+      end
+      images[i]={img,picture(45) or img};namesList[i]=stem
+    end
+    local game={data={gen3Pokemon={_names=namesList,frontPic=function(species)
+      return {image=images[species][math.floor(fixtureTime*12)%2+1]}
+    end}}}
+    for i=1,16 do fixtureTime=i/60;rain.update(game,1/60) end
+    local matrix=module('matrix')(g)
+    local draw=module('effects')(g,{matrix=matrix,pokemon=rain.draw})
+    local names={'Star Warp','Aurora Veil','Neon Pokeballs','Prism Garden','Moonlit Ripples','Matrix Rain','Pokemon Rain (sprite provider fixture)'}
     local shots={}
-    for i=1,5 do
+    for i=1,7 do
       local c=g.newCanvas(960,540)
       g.setCanvas(c);g.clear(0,0,0,1);draw(i,12,960,540,1);g.setCanvas()
       local bytes=c:newImageData():encode('png'):getString()
@@ -14,11 +42,11 @@ function love.load()
     end
     for _,size in ipairs({{320,240},{480,320},{1920,1080},{540,960},{2560,1080},{3840,1080},{5120,1440}}) do
       local c=g.newCanvas(size[1],size[2]);g.setCanvas(c)
-      for i=1,5 do draw(i,9,size[1],size[2],.5)end
+      for i=1,7 do draw(i,9,size[1],size[2],.5)end
       g.setCanvas();c:release()
     end
     local wideShots={}
-    for i=1,5 do
+    for i=1,7 do
       local c=g.newCanvas(1920,540);g.setCanvas(c);g.clear(0,0,0,1)
       draw(i,12,1920,540,1);g.setCanvas();wideShots[i]=c
       local pixels=c:newImageData()
@@ -33,7 +61,7 @@ function love.load()
         assert(hits>8,'effect '..i..' must populate outer third '..side..': '..hits)
       end
     end
-    local wideGallery=g.newCanvas(1920,2850);g.setCanvas(wideGallery);g.clear(.025,.035,.065,1)
+    local wideGallery=g.newCanvas(1920,3990);g.setCanvas(wideGallery);g.clear(.025,.035,.065,1)
     g.setFont(g.newFont(20))
     for i,c in ipairs(wideShots)do
       g.setColor(1,1,1,1);g.draw(c,0,(i-1)*570);g.print(names[i],20,(i-1)*570+544)
@@ -48,20 +76,31 @@ function love.load()
     g.setCanvas(transparent);g.clear(.8,.2,.1,1);draw(3,12,960,540,1,.5);g.setCanvas()
     r=transparent:newImageData():getPixel(0,0)
     assert(math.abs(r-.409)<.02,'half dim blends world')
-    local gallery=g.newCanvas(1200,1110);g.setCanvas(gallery);g.clear(.025,.035,.065,1)
+    local gallery=g.newCanvas(1200,1480);g.setCanvas(gallery);g.clear(.025,.035,.065,1)
     g.setFont(g.newFont(20))
     for i,c in ipairs(shots)do
       local x=((i-1)%2)*600;local y=math.floor((i-1)/2)*370
       g.setColor(1,1,1,1);g.draw(c,x,y,0,.625,.625);g.print(names[i],x+20,y+342)
     end
-    g.setColor(.8,.9,1,1);g.print('SCREENSAVER',640,790)
-    g.print('Five effects. Your world behind them.',640,835)
-    g.print('Optional pause / adjustable background dim',640,875)
+    g.setColor(.8,.9,1,1);g.print('SCREENSAVER',640,1160)
+    g.print('Seven effects. Your world behind them.',640,1205)
+    g.print('Optional pause / adjustable background dim',640,1245)
     g.setCanvas()
     local bytes=gallery:newImageData():encode('png'):getString()
     local f=assert(io.open(root..'Screensaver/docs/gallery.png','wb'));f:write(bytes);f:close()
+    local palettes=g.newCanvas(1200,1850);g.setCanvas(palettes);g.clear(.025,.035,.065,1)
+    local labels={'Green','Amber','Cyan','Red','Violet','White','Rainbow Flow','Ocean Flow','Sunset Flow','Aurora Flow'}
+    for i=1,10 do
+      local c=g.newCanvas(960,540);g.setCanvas(c);g.clear(0,0,0,1);draw(6,12,960,540,1,1,i)
+      g.setCanvas(palettes);g.setColor(1,1,1,1)
+      local x,y=((i-1)%2)*600,math.floor((i-1)/2)*370
+      g.draw(c,x,y,0,.625,.625);g.print(labels[i],x+20,y+342)
+    end
+    g.setCanvas()
+    bytes=palettes:newImageData():encode('png'):getString()
+    f=assert(io.open(root..'Screensaver/docs/matrix-palettes.png','wb'));f:write(bytes);f:close()
   end,debug.traceback)
-  local f=io.open(root..'.work/screensaver-preview/result.txt','w');f:write(ok and 'PASS native graphics: five effects, eight resolutions, 32:9 outer-third coverage and transparency' or tostring(err));f:close()
+  local f=io.open(root..'.work/screensaver-preview/result.txt','w');f:write(ok and 'PASS native graphics: seven effects, ten Matrix palettes, eight resolutions, 32:9 coverage and transparency' or tostring(err));f:close()
   love.event.quit()
 end
 
