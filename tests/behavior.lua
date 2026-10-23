@@ -4,11 +4,16 @@ local draws=0
 local circleLines=0
 local circleCount,waveLines=0,0
 local glyphCount,imageFrames=0,{}
+local observedEffect
 for _,name in ipairs({'origin','setShader','setScissor','setBlendMode','scale','rotate','translate','setLineWidth','ellipse','polygon','line','circle','rectangle'}) do
   love.graphics[name]=function()draws=draws+1 end
 end
 love.graphics.line=function()draws=draws+1;waveLines=waveLines+1 end
-love.graphics.print=function(text)if #tostring(text)==1 then glyphCount=glyphCount+1 end end
+love.graphics.print=function(text)
+  if #tostring(text)==1 then glyphCount=glyphCount+1 end
+  local effect=tostring(text):match('^__screensaver_effect:(%d+)$')
+  if effect then observedEffect=tonumber(effect) end
+end
 love.graphics.draw=function(img)
   draws=draws+1
   if type(img)=='table' and img.fixtureFrame then imageFrames[img.fixtureFrame]=true end
@@ -31,6 +36,10 @@ function fs.write(p,v)files[p]=v;return true end
 function fs.createDirectory()return true end
 function fs.load(p)return (loadstring or load)(files[p] or '')end
 local Loader=require('src.mods.Loader')
+-- Observe dispatch while still executing each production renderer.
+local effectSource=files['mods/screensaver/effects.lua']
+files['mods/screensaver/effects.lua']='local factory=(function()\n'..effectSource..'\nend)()\n'
+  .."return function(g,extra)local draw=factory(g,extra);return function(effect,...)g.print('__screensaver_effect:'..effect,0,0);return draw(effect,...)end end"
 local loader=Loader.new({fs=fs,generation=GV.generation(),version=arg[1],dev=false})
 local data={pokemon={},moves={},items={},maps={},tilesets={}}
 loader:load(data)
@@ -98,7 +107,7 @@ assert(#rows==1 and rows[1].id=='screensaver:settings','settings entry')
 -- Exercise settings with the actual registered list screen for Gen 1/2.
 if GV.generation()~=3 then
   rows[1].activate(game)
-  assert(#game.stack.topScreen.items==9,'eight controls and back')
+  assert(#game.stack.topScreen.items==10,'nine controls and back')
   local controls=game.stack.topScreen.items
   for _,expected in ipairs({{9,'10 SEC'},{8,'5 SEC'},{7,'1 SEC'},{6,'600 SEC'}}) do
     controls[3].control.step(game,-1)
@@ -116,6 +125,8 @@ if GV.generation()~=3 then
   controls[7].control.step(game,1)
   assert(loader.modOptions.screensaver.matrix==2,'Matrix color saved')
   controls[8].control.step(game,1)
+  assert(loader.modOptions.screensaver.interval==5,'Random interval saved')
+  controls[9].control.step(game,1)
   update(1);assert(render(),'preview activates without idle delay')
   event('input.key',{phase='pressed',key='x'})
   event('input.key',{phase='released',key='x'});update(2)
@@ -170,6 +181,38 @@ update(4);local simulationBefore=ticks
 for _=1,4 do update(1);render() end
 assert(ticks==simulationBefore,'game remains paused during animated rain')
 assert(imageFrames.A and imageFrames.B,'sprite animation advances while paused')
+options.effect=8;options.interval=1;options.speed=4
+update(1);render();local first=observedEffect
+assert(first>=1 and first<=7,'Random selects a real effect')
+local cycleTicks=ticks
+update(19);render();assert(observedEffect==first,'no switch before five real seconds at 2x animation speed')
+update(1);render();assert(observedEffect~=first,'switch exactly at interval')
+local seen={[first]=true,[observedEffect]=true}
+local previous=observedEffect
+for i=3,14 do
+  update(20);render()
+  assert(observedEffect~=previous,'no repeat at round boundary')
+  if i==8 then seen={} end
+  assert(not seen[observedEffect],'all seven effects appear once per shuffle')
+  seen[observedEffect]=true;previous=observedEffect
+end
+assert(ticks==cycleTicks,'rotation keeps simulation paused')
+-- Check each interval from a fresh activation, including slow animation.
+options.speed=1
+for slot,seconds in ipairs({5,10,15,30,60,120,300,600}) do
+  event('input.key',{phase='pressed',key='x'})
+  event('input.key',{phase='released',key='x'});update(1)
+  options.interval=slot;update(4);render();local initial=observedEffect
+  update(seconds*4-1);render();assert(observedEffect==initial,'full Random interval '..seconds)
+  update(1);render();assert(observedEffect~=initial,'Random switches at '..seconds)
+end
+options.pause=0;local liveTicks=ticks
+update(4);render();assert(ticks==liveTicks+4,'Random permits live world when pause is off')
+assert(not event('input.key',{phase='pressed',key='x'}),'Random wake key consumed')
+assert(not render(),'Random dismisses immediately')
+event('input.key',{phase='released',key='x'});update(1)
+options.effect=3;options.pause=1;update(4);render();local fixedEffect=observedEffect
+update(100);render();assert(fixedEffect==3 and observedEffect==3,'fixed effect never cycles')
 gameplay(false)
 assert(not render(),'title blocks stale overlay before another update')
 local beforeTitle=ticks;update(100)

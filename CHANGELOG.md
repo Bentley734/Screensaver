@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0] - 2026-10-22
+
+### Added
+- Random mode shuffles through all seven effects before starting another round, with no immediate repeats.
+- Random Interval selects 5, 10, 15, 30, 60, 120, 300 or 600 seconds between effects (default 30 seconds).
+- Rotation uses real time, independently of animation speed, and keeps pause/live-world settings in effect throughout.
+
 ## [1.1.1] - 2026-10-22
 
 ### Changed

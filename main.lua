@@ -1,20 +1,22 @@
 return function(mod)
   local ID='screensaver'
-  local names={'STAR WARP','AURORA VEIL','NEON POKEBALLS','PRISM GARDEN','MOONLIT RIPPLES','MATRIX RAIN','POKEMON RAIN'}
+  local names={'STAR WARP','AURORA VEIL','NEON POKEBALLS','PRISM GARDEN','MOONLIT RIPPLES','MATRIX RAIN','POKEMON RAIN','RANDOM'}
   local matrixNames={'GREEN','AMBER','CYAN','RED','VIOLET','WHITE','RAINBOW FLOW','OCEAN FLOW','SUNSET FLOW','AURORA FLOW'}
   -- Keep the original saved indices stable when adding shorter delays.
   local delays={15,30,60,120,300,600,1,5,10}
   local delayOrder={7,8,9,1,2,3,4,5,6}
   local speeds={.5,1,1.5,2}
   local shades={0,.25,.5,.75,1}
-  local defaults={enabled=1,effect=1,delay=3,speed=2,pause=1,shade=3,matrix=1}
-  local limits={enabled=1,effect=7,delay=9,speed=4,pause=1,shade=5,matrix=10}
+  local intervals={5,10,15,30,60,120,300,600}
+  local defaults={enabled=1,effect=1,delay=3,speed=2,pause=1,shade=3,matrix=1,interval=4}
+  local limits={enabled=1,effect=8,delay=9,speed=4,pause=1,shade=5,matrix=10,interval=8}
   local function setting(k)
     local n=tonumber(mod.options:get(k)) or tonumber(mod.save:get(k)) or defaults[k]
     if n~=n or n==math.huge or n==-math.huge then n=defaults[k] end
     return math.max((k=='enabled' or k=='pause') and 0 or 1,math.min(limits[k],math.floor(n)))
   end
   local idle,active,time,fade=0,false,0,0
+  local bag,lastRandom,currentEffect,modeLast,cycleTime={},nil,nil,nil,0
   local keys,buttons,axes,swallowedKeys,swallowedButtons={},{},{},{},{}
   local waking,previewRequested=false,false
   local pointers={}
@@ -22,10 +24,30 @@ return function(mod)
   local rain=module('pokemon_rain')(mod,love.graphics)
   local matrix=module('matrix')(love.graphics)
   local draw=module('effects')(love.graphics,{matrix=matrix,pokemon=rain.draw})
+  local function shuffledEffect()
+    if #bag==0 then
+      for i=1,7 do bag[i]=i end
+      for i=7,2,-1 do local j=math.random(i);bag[i],bag[j]=bag[j],bag[i] end
+      if bag[#bag]==lastRandom then bag[1],bag[#bag]=bag[#bag],bag[1] end
+    end
+    lastRandom=table.remove(bag)
+    return lastRandom
+  end
+  local function switchEffect(mode)
+    local previous=currentEffect
+    currentEffect=mode==8 and shuffledEffect() or mode
+    if previous==7 or currentEffect==7 then rain.reset() end
+    modeLast,time,fade=mode,0,0
+  end
+  local function displayedEffect()
+    local mode=setting('effect')
+    return mode==8 and currentEffect or mode
+  end
   local loadedSave
   local function wake()
     local was=active
     idle,active,time,fade=0,false,0,0
+    bag,currentEffect,modeLast,cycleTime={},nil,nil,0
     if was then waking=true;rain.reset() end
     return was
   end
@@ -126,17 +148,31 @@ return function(mod)
     if previewRequested and not held(game) then
       previewRequested=false;idle=delays[setting('delay')]
     end
-    if idle>=delays[setting('delay')] then active=true end
+    local starting=false
+    if idle>=delays[setting('delay')] and not active then
+      active=true;starting=true;switchEffect(setting('effect'));cycleTime=0
+    end
     if active then
+      local mode=setting('effect')
+      if mode~=modeLast then bag={};switchEffect(mode);cycleTime=0;starting=true end
+      if mode==8 and not starting then
+        cycleTime=cycleTime+dt
+        local interval=intervals[setting('interval')]
+        if cycleTime>=interval then
+          cycleTime=cycleTime%interval;switchEffect(mode)
+        end
+      end
       time=time+dt*speeds[setting('speed')];fade=math.min(1,fade+dt/.8)
-      if setting('effect')==7 then rain.update(game,dt) end
+      if displayedEffect()==7 then rain.update(game,dt) end
       if setting('pause')==1 then return end
     end
     return nextFn(game,dt)
   end,-10000) -- Sprite providers must advance before we pause game:update.
   mod.hooks:wrap('render.hud',function(nextFn,game,viewport)
     local result=nextFn(game,viewport)
-    if active and inLoadedGame(game) then draw(setting('effect'),time,viewport.width,viewport.height,fade,shades[setting('shade')],setting('matrix')) end
+    if active and inLoadedGame(game) and displayedEffect() then
+      draw(displayedEffect(),time,viewport.width,viewport.height,fade,shades[setting('shade')],setting('matrix'))
+    end
     return result
   end,900)
   local function persist(ctx,k,value)
@@ -174,6 +210,7 @@ return function(mod)
     add('pause','PAUSE GAME',function()return setting('pause')==1 and 'ON' or 'OFF'end)
     add('shade','BACKGROUND DIM',function()return tostring(shades[setting('shade')]*100)..'%'end)
     add('matrix','MATRIX COLOR',function()return matrixNames[setting('matrix')]end)
+    add('interval','RANDOM INTERVAL',function()return tostring(intervals[setting('interval')])..' SEC'end)
     local function preview(ctx)
       if not inLoadedGame(ctx.game or ctx) then return false end
       if setting('enabled')==0 then persist(ctx,'enabled',1) end

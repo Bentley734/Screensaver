@@ -4,7 +4,7 @@ Screensaver gives your idle Gen1Recomp game seven animated escapes, with an opti
 
 ## Install
 
-1. Download `Screensaver-v1.1.1.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
+1. Download `Screensaver-v1.2.0.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
 2. Extract the `screensaver` folder into Gen1Recomp's `mods` directory, enable **Screensaver** in the mod manager and restart the game.
 3. Load a save, open **Options → Screensaver**, choose an effect and use **Preview** or leave the controls idle.
 
@@ -29,12 +29,13 @@ Previews are in [docs](docs/), including a [32:9 gallery](docs/ultrawide.png), a
 | Setting | Choices | Default |
 |---|---|---|
 | Screensaver | On / Off | On |
-| Effect | Seven effects above | Star Warp |
+| Effect | Seven effects above / Random | Star Warp |
 | Idle delay | 1 / 5 / 10 / 15 / 30 / 60 / 120 / 300 / 600 seconds | 60 seconds |
 | Animation speed | 0.5× / 1× / 1.5× / 2× | 1× |
 | Pause game | On / Off | On |
 | Background dim | 0 / 25 / 50 / 75 / 100% | 50% |
 | Matrix color | Green / Amber / Cyan / Red / Violet / White / Rainbow Flow / Ocean Flow / Sunset Flow / Aurora Flow | Green |
+| Random interval | 5 / 10 / 15 / 30 / 60 / 120 / 300 / 600 seconds | 30 seconds |
 | Preview | Start after releasing the selection button, within a loaded game | — |
 
 To keep watching the world move, set **Pause Game = Off**, then choose **Background Dim = 0%**, **25%** or **50%**. Effects remain visible over the live game. At 100%, the backdrop fully covers the game. With pause off, battles, scripts and world events continue normally beneath the screensaver. Audio continues in either mode.
@@ -44,6 +45,8 @@ Press a key or controller button, move a stick, move/click the mouse, scroll, or
 Settings persist through the game's normal options storage. Preview also enables the screensaver if it was off.
 
 The idle timer and Preview are enabled only after loading a save and entering gameplay. Intros, title/start screens and new-game setup never activate the screensaver. Returning to title dismisses the overlay and resets the timer; loading another save begins a fresh wait. A new adventure must be saved and loaded before Screensaver is eligible.
+
+Choose **Effect = Random** to cycle through all seven screensavers. **Random Interval** controls how long each is shown, measured in real seconds regardless of Animation Speed. Each round shuffles all seven effects; none repeats within a round or immediately across round boundaries. A fresh activation starts a new shuffle and a full switch interval. Matrix keeps your selected palette, Pokemon Rain keeps live sprite animation, and Pause Game / Background Dim apply throughout. Fixed-effect selections never cycle. The interval is independent of Idle Delay, which controls only when Screensaver first starts.
 
 For **Matrix Rain**, choose **Matrix Color** to select a solid palette or a flowing gradient. The [palette gallery](docs/matrix-palettes.png) shows all ten choices.
 

@@ -1,7 +1,7 @@
 {
   "id": "screensaver",
   "name": "Screensaver",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "api": 2,
   "entry": "main.lua",
   "profile": "overhaul",
@@ -13,5 +13,5 @@
   "dependencies": [],
   "affects_link": false,
   "github": "Bentley734/Screensaver",
-  "description": "Seven idle effects including Matrix rain with ten palettes and animated Pokemon rain using your active sprite set. Configurable delay, speed, background dim and optional pause."
+  "description": "Seven idle effects plus Random mode with a configurable switch interval, colored Matrix rain and animated Pokemon rain from your active sprite set. Optional pause and live-world overlays."
 }
