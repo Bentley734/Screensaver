@@ -121,6 +121,12 @@ return function(g,extra)
       color(.2,.7,1,a*.25);g.circle('line',x,y,r+10)
     end
   end
+  for id=13,17 do
+    local classicId=id
+    effects[id]=function(t,w,h)
+      if extra.classic then extra.classic(classicId,t,w,h,opacity) end
+    end
+  end
   return function(effect,t,w,h,alpha,shade,palette)
     if w<=0 or h<=0 then return end
     g.push('all');g.origin();g.setShader();g.setScissor();g.setBlendMode('alpha')

@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.0] - 2026-10-22
+
+### Added
+- Retro Pipes, Mystify Trails and Bubble Drift: original effects inspired by classic Windows screensavers.
+- Flurry Streams and Flying Toasters: original homages to classic Mac-era screen savers.
+
+### Changed
+- Random mode now shuffles all sixteen effects, retaining saved selections and intervals.
+- GitHub releases now contain only the installable mod ZIP, preventing preview archives from confusing the launcher updater. Removed auxiliary assets from older releases too; previews remain in repository docs.
+
 ## [1.3.0] - 2026-10-22
 
 ### Added

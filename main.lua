@@ -1,8 +1,8 @@
 return function(mod)
   local ID='screensaver'
-  local names={'STAR WARP','AURORA VEIL','NEON POKEBALLS','PRISM GARDEN','MOONLIT RIPPLES','MATRIX RAIN','POKEMON RAIN','RANDOM','POKEMON ORBITS','POKEMON CONSTELLATION','POKEMON MOSAIC','POKEBALL PULSES'}
+  local names={'STAR WARP','AURORA VEIL','NEON POKEBALLS','PRISM GARDEN','MOONLIT RIPPLES','MATRIX RAIN','POKEMON RAIN','RANDOM','POKEMON ORBITS','POKEMON CONSTELLATION','POKEMON MOSAIC','POKEBALL PULSES','RETRO PIPES','MYSTIFY TRAILS','BUBBLE DRIFT','FLURRY STREAMS','FLYING TOASTERS'}
   -- Keep Random at its saved index 8; new renderers use the appended ids.
-  local effectIds={1,2,3,4,5,6,7,9,10,11,12}
+  local effectIds={1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17}
   local function usesSprites(id)return id==7 or id==9 or id==10 or id==11 end
   local matrixNames={'GREEN','AMBER','CYAN','RED','VIOLET','WHITE','RAINBOW FLOW','OCEAN FLOW','SUNSET FLOW','AURORA FLOW'}
   -- Keep the original saved indices stable when adding shorter delays.
@@ -12,7 +12,7 @@ return function(mod)
   local shades={0,.25,.5,.75,1}
   local intervals={5,10,15,30,60,120,300,600}
   local defaults={enabled=1,effect=1,delay=3,speed=2,pause=1,shade=3,matrix=1,interval=4}
-  local limits={enabled=1,effect=12,delay=9,speed=4,pause=1,shade=5,matrix=10,interval=8}
+  local limits={enabled=1,effect=17,delay=9,speed=4,pause=1,shade=5,matrix=10,interval=8}
   local function setting(k)
     local n=tonumber(mod.options:get(k)) or tonumber(mod.save:get(k)) or defaults[k]
     if n~=n or n==math.huge or n==-math.huge then n=defaults[k] end
@@ -26,7 +26,7 @@ return function(mod)
   local function module(name)return assert(load(assert(mod:read(name..'.lua')),'@screensaver/'..name..'.lua'))()end
   local rain=module('pokemon_rain')(mod,love.graphics)
   local matrix=module('matrix')(love.graphics)
-  local draw=module('effects')(love.graphics,{matrix=matrix,pokemon=rain.draw})
+  local draw=module('effects')(love.graphics,{matrix=matrix,pokemon=rain.draw,classic=module('classic')(love.graphics)})
   local function shuffledEffect()
     if #bag==0 then
       for i,id in ipairs(effectIds) do bag[i]=id end

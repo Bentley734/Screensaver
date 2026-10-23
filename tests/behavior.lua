@@ -120,7 +120,7 @@ if GV.generation()~=3 then
   assert(loader.modOptions.screensaver.delay==1,'returns to original 15-second setting')
   loader.modOptions.screensaver.effect=8
   assert(controls[2].control.value()=='RANDOM','saved Random index remains 8')
-  for _,expected in ipairs({{9,'POKEMON ORBITS'},{10,'POKEMON CONSTELLATION'},{11,'POKEMON MOSAIC'},{12,'POKEBALL PULSES'},{1,'STAR WARP'}}) do
+  for _,expected in ipairs({{9,'POKEMON ORBITS'},{10,'POKEMON CONSTELLATION'},{11,'POKEMON MOSAIC'},{12,'POKEBALL PULSES'},{13,'RETRO PIPES'},{14,'MYSTIFY TRAILS'},{15,'BUBBLE DRIFT'},{16,'FLURRY STREAMS'},{17,'FLYING TOASTERS'},{1,'STAR WARP'}}) do
     controls[2].control.step(game,1)
     assert(loader.modOptions.screensaver.effect==expected[1] and controls[2].control.value()==expected[2],'new effect selection and wrap')
   end
@@ -195,20 +195,21 @@ end
 options.effect=12;update(1)
 local pulseCircles=circleLines;render()
 assert(circleLines>pulseCircles,'Pokeball Pulses draws expanding ball rings')
+for id=13,17 do options.effect=id;update(1);assert(render(),'classic desktop effect '..id)end
 options.effect=8;options.interval=1;options.speed=4
 update(1);render();local first=observedEffect
-assert(first>=1 and first<=12 and first~=8,'Random selects a real effect')
+assert(first>=1 and first<=17 and first~=8,'Random selects a real effect')
 local cycleTicks=ticks
 update(19);render();assert(observedEffect==first,'no switch before five real seconds at 2x animation speed')
 update(1);render();assert(observedEffect~=first,'switch exactly at interval')
 local seen={[first]=true,[observedEffect]=true}
 local previous=observedEffect
-for i=3,22 do
+for i=3,32 do
   update(20);render()
   assert(observedEffect~=previous,'no repeat at round boundary')
-  if i==12 then seen={} end
+  if i==17 then seen={} end
   assert(observedEffect~=8,'Random never selects itself')
-  assert(not seen[observedEffect],'all eleven effects appear once per shuffle')
+  assert(not seen[observedEffect],'all sixteen effects appear once per shuffle')
   seen[observedEffect]=true;previous=observedEffect
 end
 assert(ticks==cycleTicks,'rotation keeps simulation paused')
@@ -242,4 +243,6 @@ R.hooks:removeOwner('sprite-fixture')
 assert(#loader.errors==0,table.concat(loader.errors,'\n'))
 R.hooks:removeOwner('screensaver');R.events:removeOwner('screensaver')
 local after=ticks;update(1);assert(ticks==after+1,'unload restores normal update')
-print('PASS '..arg[1]..': eleven effects, shuffled rotation, ten Matrix palettes, live animated sprite layouts, save gates and wake')
+local updateAsset=require('src.mods.ModUpdate').pickZipAsset({{name='Screensaver-v1.4.0.zip',browser_download_url='https://example.invalid/mod.zip',size=123}},'screensaver','1.4.0')
+assert(updateAsset and updateAsset.name=='Screensaver-v1.4.0.zip','single install ZIP selected by real updater')
+print('PASS '..arg[1]..': sixteen effects, full shuffled rounds, animated sprite layouts, save gates, wake and updater ZIP selection')

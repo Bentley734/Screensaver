@@ -1,16 +1,16 @@
 # Screensaver
 
-Screensaver gives your idle Gen1Recomp game eleven animated escapes, with an optional pause and a transparent view of the moving world behind the effects. Made for players who enjoy leaving their adventure on display.
+Screensaver gives your idle Gen1Recomp game sixteen animated escapes, with an optional pause and a transparent view of the moving world behind the effects. Made for players who enjoy leaving their adventure on display.
 
 ## Install
 
-1. Download `Screensaver-v1.3.0.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
+1. Download `Screensaver-v1.4.0.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
 2. Extract the `screensaver` folder into Gen1Recomp's `mods` directory, enable **Screensaver** in the mod manager and restart the game.
 3. Load a save, open **Options → Screensaver**, choose an effect and use **Preview** or leave the controls idle.
 
 Requires Gen1Recomp 0.3.54 or newer within the 0.3.x series. Targets Red, Blue, Yellow, Gold, Silver, Crystal, FireRed, LeafGreen, Ruby, Sapphire and Emerald. No Pokemon sprite files or ROM data are bundled in the playable package; Pokemon Rain borrows images from your own game and active sprite mods.
 
-## Eleven effects
+## Sixteen effects
 
 | Effect | Look |
 |---|---|
@@ -25,15 +25,20 @@ Requires Gen1Recomp 0.3.54 or newer within the 0.3.x series. Targets Red, Blue, 
 | Pokemon Constellation | Drifting animated sprites form a luminous network of linked stars. |
 | Pokemon Mosaic | An endless scrolling tile wall of animated sprites with gentle bobbing. |
 | Pokeball Pulses | Luminous Pokeball outlines expand and fade across the screen. |
+| Retro Pipes | Growing shaded pipes turn through colorful right-angle networks. |
+| Mystify Trails | Bouncing wireframe polygons leave flowing multicolor trails. |
+| Bubble Drift | Glossy translucent bubbles drift and shimmer across the screen. |
+| Flurry Streams | Swirling colored particles trace luminous flowing streams. |
+| Flying Toasters | Original winged toasters flap past drifting slices of toast. |
 
-Previews are in [docs](docs/), including a [32:9 gallery](docs/ultrawide.png), also available as a separate release download.
+Previews are in [docs](docs/), including a [32:9 gallery](docs/ultrawide.png). Releases contain only the installable mod ZIP so the launcher updater cannot accidentally select a preview archive. The five classic-desktop homages use original procedural artwork inspired by Windows and Mac-era screensavers; no operating-system assets or binaries are included.
 
 ## Controls
 
 | Setting | Choices | Default |
 |---|---|---|
 | Screensaver | On / Off | On |
-| Effect | Eleven effects above / Random | Star Warp |
+| Effect | Sixteen effects above / Random | Star Warp |
 | Idle delay | 1 / 5 / 10 / 15 / 30 / 60 / 120 / 300 / 600 seconds | 60 seconds |
 | Animation speed | 0.5× / 1× / 1.5× / 2× | 1× |
 | Pause game | On / Off | On |
@@ -50,7 +55,7 @@ Settings persist through the game's normal options storage. Preview also enables
 
 The idle timer and Preview are enabled only after loading a save and entering gameplay. Intros, title/start screens and new-game setup never activate the screensaver. Returning to title dismisses the overlay and resets the timer; loading another save begins a fresh wait. A new adventure must be saved and loaded before Screensaver is eligible.
 
-Choose **Effect = Random** to cycle through all eleven screensavers. **Random Interval** controls how long each is shown, measured in real seconds regardless of Animation Speed. Each round shuffles all eleven effects; none repeats within a round or immediately across round boundaries. A fresh activation starts a new shuffle and a full switch interval. Matrix keeps your selected palette, sprite effects keep live animation, and Pause Game / Background Dim apply throughout. Fixed-effect selections never cycle. The interval is independent of Idle Delay, which controls only when Screensaver first starts.
+Choose **Effect = Random** to cycle through all sixteen screensavers. **Random Interval** controls how long each is shown, measured in real seconds regardless of Animation Speed. Each round shuffles all sixteen effects; none repeats within a round or immediately across round boundaries. A fresh activation starts a new shuffle and a full switch interval. Matrix keeps your selected palette, sprite effects keep live animation, and Pause Game / Background Dim apply throughout. Fixed-effect selections never cycle. The interval is independent of Idle Delay, which controls only when Screensaver first starts.
 
 For **Matrix Rain**, choose **Matrix Color** to select a solid palette or a flowing gradient. The [palette gallery](docs/matrix-palettes.png) shows all ten choices.
 
@@ -62,7 +67,7 @@ Sprite previews use a local 1025Dex sprite-provider fixture; your installed effe
 
 Uses shared `core.update`, input and `render.hud` hooks, plus the engine's live sprite providers and `battle.mon_pic` animation hook. An internal adapter adds the submenu to Gen 3 options; it stops contributing when the mod is disabled. No game data, save progression, art packs or battle rules are modified. Other mods using these same hooks should forward the hook chain normally. Screensaver only runs where the engine allows mods; online arena boots may disable it.
 
-The regression suite loads the mod through the real sandboxed loader for all eleven games under LuaJIT and Lua 5.3, then checks all eleven effects, complete Random rounds, ten Matrix palettes, changing gradients, all four sprite layouts advancing frames while paused, static sprites, missing-art fallback, nine idle deadlines, pause/live simulation, wake input, held controls, focus recovery and hook removal. Effects adapt to the full window, including 32:9 ultrawide and portrait displays, without stretching individual balls or diamonds. Native LÖVE rendering checks eight screen sizes, including 3840×1080 and 5120×1440, and verifies artwork in both outer thirds of a 32:9 frame. These checks use fixtures rather than full interactive playthroughs.
+The regression suite loads the mod through the real sandboxed loader for all eleven games under LuaJIT and Lua 5.3, then checks all sixteen effects, complete Random rounds, classic animation geometry, ten Matrix palettes, changing gradients, all four sprite layouts advancing frames while paused, static sprites, missing-art fallback, nine idle deadlines, pause/live simulation, wake input, held controls, focus recovery, hook removal and the launcher's ZIP selection. Effects adapt to the full window, including 32:9 ultrawide and portrait displays, without stretching individual balls or diamonds. Native LÖVE rendering checks eight screen sizes, including 3840×1080 and 5120×1440, and verifies artwork in both outer thirds of a 32:9 frame. These checks use fixtures rather than full interactive playthroughs.
 
 From the workspace containing the engine checkout:
 
@@ -70,9 +75,10 @@ From the workspace containing the engine checkout:
 python Screensaver/tools/test.py
 python gen1recomp-0.3.54/tools/modkit.py validate Screensaver --base fixture
 python gen1recomp-0.3.54/tools/modkit.py lint Screensaver
+python Screensaver/tools/package.py
 ```
 
-The seven effects that do not use Pokemon sprites are original procedural graphics. Matrix uses the built-in font atlas and a text batch. All four sprite effects borrow engine/mod images and never release or change their pixels.
+The twelve effects that do not use Pokemon sprites are original procedural graphics. Matrix uses the built-in font atlas and a text batch. All four sprite effects borrow engine/mod images and never release or change their pixels.
 
 
 

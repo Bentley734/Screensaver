@@ -30,9 +30,9 @@ function love.load()
     end}}}
     for i=1,16 do fixtureTime=i/60;rain.update(game,1/60) end
     local matrix=module('matrix')(g)
-    local draw=module('effects')(g,{matrix=matrix,pokemon=rain.draw})
-    local names={'Star Warp','Aurora Veil','Neon Pokeballs','Prism Garden','Moonlit Ripples','Matrix Rain','Pokemon Rain','Pokemon Orbits','Pokemon Constellation','Pokemon Mosaic','Pokeball Pulses'}
-    local ids={1,2,3,4,5,6,7,9,10,11,12}
+    local draw=module('effects')(g,{matrix=matrix,pokemon=rain.draw,classic=module('classic')(g)})
+    local names={'Star Warp','Aurora Veil','Neon Pokeballs','Prism Garden','Moonlit Ripples','Matrix Rain','Pokemon Rain','Pokemon Orbits','Pokemon Constellation','Pokemon Mosaic','Pokeball Pulses','Retro Pipes','Mystify Trails','Bubble Drift','Flurry Streams','Flying Toasters'}
+    local ids={1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17}
     local shots={}
     for i,id in ipairs(ids) do
       local c=g.newCanvas(960,540)
@@ -62,10 +62,11 @@ function love.load()
         assert(hits>8,'effect '..i..' must populate outer third '..side..': '..hits)
       end
     end
-    local wideGallery=g.newCanvas(1920,6270);g.setCanvas(wideGallery);g.clear(.025,.035,.065,1)
+    local wideGallery=g.newCanvas(1920,2400);g.setCanvas(wideGallery);g.clear(.025,.035,.065,1)
     g.setFont(g.newFont(20))
     for i,c in ipairs(wideShots)do
-      g.setColor(1,1,1,1);g.draw(c,0,(i-1)*570);g.print(names[i],20,(i-1)*570+544)
+      local x,y=((i-1)%2)*960,math.floor((i-1)/2)*300
+      g.setColor(1,1,1,1);g.draw(c,x,y,0,.5,.5);g.print(names[i],x+20,y+274)
     end
     g.setCanvas()
     local wideBytes=wideGallery:newImageData():encode('png'):getString()
@@ -77,15 +78,14 @@ function love.load()
     g.setCanvas(transparent);g.clear(.8,.2,.1,1);draw(3,12,960,540,1,.5);g.setCanvas()
     r=transparent:newImageData():getPixel(0,0)
     assert(math.abs(r-.409)<.02,'half dim blends world')
-    local gallery=g.newCanvas(1200,2220);g.setCanvas(gallery);g.clear(.025,.035,.065,1)
+    local gallery=g.newCanvas(1200,3040);g.setCanvas(gallery);g.clear(.025,.035,.065,1)
     g.setFont(g.newFont(20))
     for i,c in ipairs(shots)do
       local x=((i-1)%2)*600;local y=math.floor((i-1)/2)*370
       g.setColor(1,1,1,1);g.draw(c,x,y,0,.625,.625);g.print(names[i],x+20,y+342)
     end
-    g.setColor(.8,.9,1,1);g.print('SCREENSAVER',640,1900)
-    g.print('Eleven effects. Your world behind them.',640,1945)
-    g.print('Sprite previews use a local 1025Dex fixture.',640,1985)
+    g.setColor(.8,.9,1,1);g.print('SCREENSAVER / 16 EFFECTS',20,2970)
+    g.print('Sprite previews use a local 1025Dex fixture.',20,3005)
     g.setCanvas()
     local bytes=gallery:newImageData():encode('png'):getString()
     local f=assert(io.open(root..'Screensaver/docs/gallery.png','wb'));f:write(bytes);f:close()
@@ -101,7 +101,7 @@ function love.load()
     bytes=palettes:newImageData():encode('png'):getString()
     f=assert(io.open(root..'Screensaver/docs/matrix-palettes.png','wb'));f:write(bytes);f:close()
   end,debug.traceback)
-  local f=io.open(root..'.work/screensaver-preview/result.txt','w');f:write(ok and 'PASS native graphics: eleven effects, ten Matrix palettes, eight resolutions, 32:9 coverage and transparency' or tostring(err));f:close()
+  local f=io.open(root..'.work/screensaver-preview/result.txt','w');f:write(ok and 'PASS native graphics: sixteen effects, ten Matrix palettes, eight resolutions, 32:9 coverage and transparency' or tostring(err));f:close()
   love.event.quit()
 end
 

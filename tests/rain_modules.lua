@@ -41,3 +41,22 @@ end
 rain.reset();rain.update({data={gen3Pokemon={_names={}}}},.1);rain.draw(0,960,540,1)
 assert(notices==1,'missing artwork degrades to a loading notice')
 print('PASS Pokemon rain: static art, adaptive density and missing-art fallback')
+local recorded={}
+local classicGraphics={push=function()end,pop=function()end,setLineWidth=function()end}
+local function record(...)
+  for _,v in ipairs({...}) do
+    if type(v)=='number' then
+      assert(v==v and math.abs(v)<1e8,'finite classic geometry')
+      if #recorded<1000 then recorded[#recorded+1]=string.format('%.4f',v) end
+    elseif type(v)=='table' then record((unpack or table.unpack)(v)) end
+  end
+end
+for _,name in ipairs({'translate','scale','rotate','line','polygon','circle','ellipse','rectangle'}) do classicGraphics[name]=record end
+classicGraphics.setColor=function(r,g,b,a)assert(a>=0 and a<=.5,'classic fade alpha');record(r,g,b,a)end
+local classic=assert(load(files['mods/screensaver/classic.lua']))()(classicGraphics)
+for id=13,17 do
+  recorded={};classic(id,1,1920,540,.5);local a=table.concat(recorded,',')
+  assert(#recorded>20,'classic draws geometry '..id)
+  recorded={};classic(id,2,1920,540,.5);assert(a~=table.concat(recorded,','),'classic animates '..id)
+end
+print('PASS five classic effects: animated geometry, finite coordinates and fade alpha')

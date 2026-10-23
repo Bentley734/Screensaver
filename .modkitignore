@@ -1,6 +1,8 @@
 tests/behavior.lua
+AGENTS.md
 tests/rain_modules.lua
 tools/test.py
+tools/package.py
 docs/effect-1.png
 docs/effect-2.png
 docs/effect-3.png
@@ -12,6 +14,11 @@ docs/effect-9.png
 docs/effect-10.png
 docs/effect-11.png
 docs/effect-12.png
+docs/effect-13.png
+docs/effect-14.png
+docs/effect-15.png
+docs/effect-16.png
+docs/effect-17.png
 docs/matrix-palettes.png
 docs/gallery.png
 docs/ultrawide.png
