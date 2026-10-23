@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1] - 2026-10-22
+
+### Changed
+- All effects adapt to the entire window, including 32:9 ultrawide and portrait screens.
+- Prism Garden expands across the frame instead of remaining in a central circle.
+- Neon Pokeballs begin distributed across the available width and height.
+- Wider and taller layouts gain more stars, balls, ripples and fireflies while preserving primitive shapes.
+
 ## [1.0.0] - 2026-10-22
 
 ### Added

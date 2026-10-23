@@ -4,7 +4,7 @@ Screensaver gives your idle Gen1Recomp game five animated escapes, with an optio
 
 ## Install
 
-1. Download `Screensaver-v1.0.0.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
+1. Download `Screensaver-v1.0.1.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
 2. Extract the `screensaver` folder into Gen1Recomp's `mods` directory, enable **Screensaver** in the mod manager and restart the game.
 3. Open **Options → Screensaver**, choose an effect and use **Preview** or leave the controls idle.
 
@@ -20,7 +20,7 @@ Requires Gen1Recomp 0.3.54 or newer within the 0.3.x series. Targets Red, Blue, 
 | Prism Garden | A rotating sixfold garden of color-shifting diamonds. |
 | Moonlit Ripples | Expanding elliptical rings and wandering fireflies. |
 
-Previews are in [docs](docs/), also available as a separate release download.
+Previews are in [docs](docs/), including a [32:9 gallery](docs/ultrawide.png), also available as a separate release download.
 
 ## Controls
 
@@ -44,7 +44,7 @@ Settings persist through the game's normal options storage. Preview also enables
 
 Uses shared `core.update`, input and `render.hud` hooks. The only internal adapter adds the submenu to Gen 3 options; it stops contributing when the mod is disabled. No game data, save progression, art packs or battle rules are modified. Other mods using these same hooks should forward the hook chain normally. Screensaver only runs where the engine allows mods; online arena boots may disable it.
 
-The regression suite loads the mod through the real sandboxed loader for all eleven games under LuaJIT and Lua 5.3, then checks activation, all five effects, pause/live simulation, wake input, held controls, focus recovery and hook removal. Native LÖVE rendering checks six screen sizes. These checks use fixtures rather than full interactive playthroughs.
+The regression suite loads the mod through the real sandboxed loader for all eleven games under LuaJIT and Lua 5.3, then checks activation, all five effects, pause/live simulation, wake input, held controls, focus recovery and hook removal. Effects adapt to the full window, including 32:9 ultrawide and portrait displays, without stretching individual balls or diamonds. Native LÖVE rendering checks eight screen sizes, including 3840×1080 and 5120×1440, and verifies artwork in both outer thirds of a 32:9 frame. These checks use fixtures rather than full interactive playthroughs.
 
 From the workspace containing the engine checkout:
 
@@ -55,3 +55,4 @@ python gen1recomp-0.3.54/tools/modkit.py lint Screensaver
 ```
 
 All effects are original procedural drawings, using ordinary LÖVE primitives with no shader or texture dependencies.
+

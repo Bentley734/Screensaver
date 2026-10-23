@@ -6,4 +6,7 @@ docs/effect-3.png
 docs/effect-4.png
 docs/effect-5.png
 docs/gallery.png
+docs/ultrawide.png
 .gitignore
+tools/native_render/main.lua
+tools/native_render/conf.lua
