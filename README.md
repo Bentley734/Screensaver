@@ -4,7 +4,7 @@ Screensaver gives your idle Gen1Recomp game five animated escapes, with an optio
 
 ## Install
 
-1. Download `Screensaver-v1.0.2.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
+1. Download `Screensaver-v1.0.3.zip` from [the latest release](https://github.com/Bentley734/Screensaver/releases/latest).
 2. Extract the `screensaver` folder into Gen1Recomp's `mods` directory, enable **Screensaver** in the mod manager and restart the game.
 3. Open **Options → Screensaver**, choose an effect and use **Preview** or leave the controls idle.
 
@@ -16,7 +16,7 @@ Requires Gen1Recomp 0.3.54 or newer within the 0.3.x series. Targets Red, Blue, 
 |---|---|
 | Star Warp | Blue-white star trails stream out from a glowing vanishing point. |
 | Aurora Veil | Layers of green, blue and violet light drift beneath a crescent moon. |
-| Neon Pokeballs | Seven luminous outlines bounce, rotate and drift across the screen. |
+| Neon Pokeballs | 24 luminous balls bounce and rotate at 16:9; 48 fill a 32:9 screen, scaling with the layout. |
 | Prism Garden | A rotating sixfold garden of color-shifting diamonds. |
 | Moonlit Ripples | Expanding elliptical rings and wandering fireflies. |
 
@@ -55,5 +55,6 @@ python gen1recomp-0.3.54/tools/modkit.py lint Screensaver
 ```
 
 All effects are original procedural drawings, using ordinary LÖVE primitives with no shader or texture dependencies.
+
 
 

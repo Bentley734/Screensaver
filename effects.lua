@@ -55,7 +55,7 @@ return function(g)
     local v=(t+offset)%(range*2);return range-math.abs(range-v)
   end
   effects[3]=function(t,w,h)
-    for i=1,count(7,w,h) do
+    for i=1,count(24,w,h) do
       local r=15+(i%3)*7
       local rx,ry=math.max(1,w-2*r-8),math.max(1,h-2*r-8)
       local x=r+4+bounce(t*(21+i*3),rx,(i*.754877666%1)*rx*2)

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.3] - 2026-10-22
+
+### Changed
+- Neon Pokeballs now uses 24 balls at 16:9 and 48 at 32:9, scaling up to 96 on larger layouts to fill more of the screen.
+
 ## [1.0.2] - 2026-10-22
 
 ### Added

@@ -1,8 +1,13 @@
 package.path='./?.lua;./?/init.lua;'..package.path
 love=require('tests.love_stub')
 local draws=0
+local circleLines=0
 for _,name in ipairs({'origin','setShader','setScissor','setBlendMode','scale','rotate','translate','setLineWidth','ellipse','polygon','line','circle','rectangle'}) do
   love.graphics[name]=function()draws=draws+1 end
+end
+love.graphics.circle=function(mode)
+  draws=draws+1
+  if mode=='line' then circleLines=circleLines+1 end
 end
 love.window={hasFocus=function()return true end}
 local GV=require('src.core.GameVersion');GV.set(arg[1])
@@ -43,6 +48,12 @@ update(59);assert(not render(),'does not start early')
 update(5);assert(render(),'starts after idle deadline')
 local paused=ticks;update(8);assert(ticks==paused,'pauses simulation')
 for i=1,5 do options.effect=i;assert(render(),'effect renders')end
+options.effect=3
+local circlesBefore=circleLines
+assert(render());assert(circleLines-circlesBefore==24*3,'24 Pokeballs at 16:9')
+circlesBefore=circleLines
+R.call('render.hud',function()end,game,{width=1920,height=540})
+assert(circleLines-circlesBefore==48*3,'48 Pokeballs at 32:9')
 assert(not event('input.key',{phase='pressed',key='z'}),'wake key consumed')
 assert(not render(),'wake hides immediately')
 update(70);assert(not render(),'held key prevents activation')
